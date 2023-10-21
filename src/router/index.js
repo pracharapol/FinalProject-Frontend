@@ -6,6 +6,7 @@ import Register from '../components/register.vue'
 import Login from '../components/Login.vue'
 import DetailPage from '../components/DetailEachRoom.vue'
 import BlankPage from '../components/BlankPage.vue'
+import rooms from '../components/rooms.vue'
 
 
 const routes = [
@@ -13,6 +14,11 @@ const routes = [
     path: '/',
     name: 'home',
     component: HomeView
+  },
+  {
+    path: '/rooms',
+    name: 'rooms',
+    component: rooms
   },
   {
     path: '/Login',
