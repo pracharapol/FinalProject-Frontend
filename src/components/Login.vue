@@ -8,11 +8,11 @@
     <form @submit.prevent="login">
       <div class="form-group">
         <label for="username" style="font-size: 20px;">Username</label>
-        <input type="text" id="username" style="text-align: center; background-color: black; color: white;" v-model="username" required>
+        <input class="inpuserpass" type="text" id="username" style="text-align: center;" v-model="username" required>
       </div>
       <div class="form-group">
         <label for="password" style="font-size: 20px;">Password</label>
-        <input type="password" id="password" style="text-align: center;" v-model="password" required>
+        <input class="inpuserpass" type="password" id="password" style="text-align: center;" v-model="password" required>
       </div>
       <button type="submit">Submit</button>
       <div class="click">Dont have account? <router-link to="/Register" class="here">Click here</router-link></div>
@@ -71,7 +71,8 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 814px;
+  height: 100vh;
+  width:100%;
   background: url(../assets/firstPagePic.png) no-repeat center center;
   background-size: cover;
   overflow: hidden;
@@ -93,7 +94,7 @@ export default {
   color: #885B3B;
 }
 .here:hover{
-  color: rgb(208, 111, 0);
+  color: rgb(255, 0, 0);
   transition: 0.5s;
 }
 label {
@@ -104,16 +105,18 @@ label {
   font-weight: bold;
 }
 
-input {
+.inpuserpass {
+  font-family: 'serif';
+  font-size: 20px;
   width: 350px;
   height: 30px;
   padding: 5px 0px;
-  border: none;
+  border: 2px solid rgb(136, 91, 59);
   border-radius: 10px;
   position: relative;
   padding-left: 5px;
-  background-color: black; /* ตั้งค่าพื้นหลังเป็นสีดำ */
-  color: white; /* ตั้งค่าสีข้อความเป็นสีขาว */
+  background-color: rgba(255, 255, 255, 0.7); /* ตั้งค่าพื้นหลังเป็นสีดำ */
+  color: rgb(0, 0, 0); /* ตั้งค่าสีข้อความเป็นสีขาว */
   margin-left: 17px;
 }
 
@@ -132,12 +135,12 @@ button {
   margin-top: 0px;
   font-size: 18px;
 }
-/* 
+
 button:hover{
-  background-color:#181818;
+  background-color:#a88063;
   border: none;
   color: #ffffff;
-  
-} */
+  transition: 0.5s;
+}
 
 </style>

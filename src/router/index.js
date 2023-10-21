@@ -22,7 +22,22 @@ const routes = [
   {
     path: '/Register',
     name: 'Register',
-    component: Register
+    component: Register,
+    children: [
+      {
+        path: '', 
+        component: BlankPage, 
+      },
+      {
+        path: 'id', 
+        component:  BlankPage,
+      },
+      {
+        path: 'photo', 
+        component:  BlankPage,
+      },
+      // ...
+    ],
   },
   {
     path: '/profile',
