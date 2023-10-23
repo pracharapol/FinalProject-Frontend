@@ -111,6 +111,92 @@ app.post('/authen', jsonParser, function (req, res, next) {
 })
 // Authen-------------------------------------------------------------------------------------------------------------------
 
+// Profile-------------------------------------------------------------------------------------------------------------------
+app.get('/profile/:token', function (req, res) {
+    try {
+        const decode = jwt.verify(req.params.token, secret);
+        const { username } = decode
+        connection.execute(
+            'SELECT * FROM user_insystem WHERE user_username=?',
+            [username],
+            function (err, results) {
+
+                if (err) {
+                    res.json({ status: 'error', message: err })
+                    return
+                }
+                if (results.length == 0) {
+                    res.json({ status: 'error', message: 'no user found' })
+                    return
+                }
+                let Usname = results[0].user_fname + ["   "] + results[0].user_lname
+                let Usemail = results[0].user_email
+                let Usphone = results[0].user_phone
+                res.json({ status: 'ok', message: 'success', usname: Usname, usemail: Usemail, usphone: Usphone })
+                return
+            }
+
+        )
+
+    } catch (err) {
+        res.json({ status: 'error', message: err.message })
+    }
+})
+// Profile-------------------------------------------------------------------------------------------------------------------
+
+// NewPassword-------------------------------------------------------------------------------------------------------------------
+app.put('/newPassword', jsonParser, function (req, res) {
+    const decode = jwt.verify(req.body.token, secret);
+    const { username } = decode
+    connection.query(
+        'SELECT user_password FROM user_insystem WHERE user_username=?', [username],
+        function (err, users, fields) {
+            bcrypt.compare(req.body.user_password, users[0].user_password, function (err, isLogin) {
+
+                if (isLogin) {
+
+                    bcrypt.hash(req.body.user_newpassword, saltRounds, function (err, hash) {
+
+                        connection.execute(
+                            'UPDATE user_insystem SET user_password =? WHERE user_username=? ', [hash, username],
+
+                            function (err, results) {
+
+                                if (err) {
+                                    res.json({ status: 'error', message: err })
+                                    return
+                                }
+                                if (results.length == 0) {
+                                    res.json({ status: 'not found user ' })
+                                    return
+                                }
+                                if (req.body.password == hash) {
+                                    res.json({ status: 'error', message: err })
+                                    return
+                                }
+                                else {
+
+                                    res.send(results)
+                                    return
+                                }
+                            }
+                        );
+
+                    });
+                }
+                else {
+                    res.json({ status: 'error', message: 'Your password is incorrect.' })
+                }
+                if (err) {
+                    res.json({ status: 'error', message: err })
+                    return
+                }
+            }
+            );
+        });
+})
+// NewPassword-------------------------------------------------------------------------------------------------------------------
+
 app.listen(3333, function () {
   console.log('CORS-enabled web server listening on port 3333')
 })
