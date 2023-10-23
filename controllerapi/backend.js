@@ -18,23 +18,23 @@ const connection = mysql.createConnection({
     user: 'root',
     database: 'mydb'
 });
-// checkEmailError-------------------------------------------------------------------------------------------------------------------
+// checkEmailError-----------------------------------------------------------------------------------------------------------
 const checkEmailError = (req, res, results) => {
     if (results.length > 0) {
         for (let i = 0; i < results.length; i++) {
-            if (((results[i].user_username.toLowerCase() == req.body.user_username.toLowerCase())) || ((results[i].user_email.toLowerCase() == req.body.user_email.toLowerCase())) || [((results[i].user_Fname.toLowerCase() == req.body.user_Fname.toLowerCase()) && (results[i].user_Lname.toLowerCase() == req.body.user_Lname.toLowerCase()))]) {
+            if (((results[i].user_username.toLowerCase() == req.body.user_username.toLowerCase())) || ((results[i].user_email.toLowerCase() == req.body.user_email.toLowerCase())) || [((results[i].user_fname.toLowerCase() == req.body.user_fname.toLowerCase()) && (results[i].user_lname.toLowerCase() == req.body.user_lname.toLowerCase()))]) {
                 return true
             }
         }
         return false
     }
 }
-// checkEmailError-------------------------------------------------------------------------------------------------------------------
+// checkEmailError------------------------------------------------------------------------------------------------------------
 
 // Register-------------------------------------------------------------------------------------------------------------------
 app.post('/register', jsonParser, function (req, res, next) {
     connection.execute(
-        'SELECT * FROM user_insystem WHERE user_email=? or user_username=? or user_Fname=? and user_Lname=?', [req.body.user_username, req.body.user_email, req.body.user_Fname, req.body.user_Lname],
+        'SELECT * FROM user_insystem WHERE user_email=? or user_username=? or user_fname=? and user_lname=?', [req.body.user_username, req.body.user_email, req.body.user_fname, req.body.user_lname],
         function (err, results) {
             if (err) {
                 return res
@@ -47,8 +47,8 @@ app.post('/register', jsonParser, function (req, res, next) {
                 else {
                     bcrypt.hash(req.body.user_password, saltRounds, function (err, hash) {
                         connection.execute(
-                            'INSERT INTO user_insystem (user_email, user_password, user_Fname, user_Lname, user_username, user_phone) VALUES (?, ?, ?, ?, ?, ?)',
-                            [req.body.user_email, hash, req.body.user_Fname, req.body.user_Lname, req.body.user_username, req.body.user_phone],
+                            'INSERT INTO user_insystem (user_email, user_password, user_fname, user_lname, user_username, user_phone) VALUES (?, ?, ?, ?, ?, ?)',
+                            [req.body.user_email, hash, req.body.user_fname, req.body.user_lname, req.body.user_username, req.body.user_phone],
                             function (err, results, fields) {
                                 if (err) {
                                     return res
@@ -66,7 +66,7 @@ app.post('/register', jsonParser, function (req, res, next) {
         }
     )
 })
-// Register-------------------------------------------------------------------------------------------------------------------
+// Register----------------------------------------------------------------------------------------------------------------
 
 // Login-------------------------------------------------------------------------------------------------------------------
 app.post('/login', jsonParser, function (req, res, next) {
@@ -98,6 +98,18 @@ app.post('/login', jsonParser, function (req, res, next) {
 })
 // Login-------------------------------------------------------------------------------------------------------------------
 
+// Authen-------------------------------------------------------------------------------------------------------------------
+
+app.post('/authen', jsonParser, function (req, res, next) {
+    try {
+        const token = req.headers.authorization.split(' ')[1]
+        var decoded = jwt.verify(token, secret);
+        res.json({ status: 'ok', decoded })
+    } catch (err) {
+        res.json({ status: 'error', message: err.message })
+    }
+})
+// Authen-------------------------------------------------------------------------------------------------------------------
 
 app.listen(3333, function () {
   console.log('CORS-enabled web server listening on port 3333')
