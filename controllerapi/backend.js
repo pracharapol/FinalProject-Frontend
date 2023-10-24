@@ -82,9 +82,10 @@ app.post('/login', jsonParser, function (req, res, next) {
                 res.json({ status: 'error', message: 'no user found' })
                 return
             }else{
+            const userId = users[0].user_id;
             bcrypt.compare(req.body.user_password, users[0].user_password, function (err, isLogin) {
                 if (isLogin) {
-                    var token = jwt.sign({ username: users[0].user_username }, secret, { expiresIn: '12h' });
+                    var token = jwt.sign({ user_id: userId, username: users[0].user_username }, secret, { expiresIn: '12h' });
                     res.json({ status: 'ok', message: 'login success', token })
 
                 }
@@ -197,6 +198,140 @@ app.put('/newPassword', jsonParser, function (req, res) {
 })
 // NewPassword-------------------------------------------------------------------------------------------------------------------
 
+// Reservation-------------------------------------------------------------------------------------------------------------------
+app.post('/reserveroom', jsonParser, async function (req, res) {
+    try {
+        const decode = jwt.verify(req.body.token, secret);
+        const { username, user_id } = decode;
+        const roomDetail = req.body.roomdetail_id;
+        
+        if (username && user_id) {
+            const startTime = req.body.start_time;
+            const endTime = req.body.end_time;
+            const dateReserve = req.body.date_reservation;
+            const createReserve = dateReserve;
+            const updateReserve = req.body.update_reservlog;
+            
+            // ดึงข้อมูล roomDetail โดยใช้ Promise
+            const roomDetailData = await getRoomDetail(roomDetail);
+            const roomIsAvailable = await isRoomAvailable(roomDetail, dateReserve, startTime, endTime);
+            if(roomIsAvailable) {
+            if (roomDetailData) {
+                // เพิ่มการจองโดยใช้ Promise
+                await addReservation(startTime, endTime, user_id, dateReserve, createReserve, updateReserve, roomDetail);
+                
+                res.json({ status: 'ok', message: 'Room reserved successfully' });
+            } else {
+                res.json({ status: 'error', message: 'Room detail not found' });
+            }
+        }else {
+            res.json({ status: 'error', message: 'Room not available' });
+        }
+
+        } else {
+            res.json({ status: 'error', message: 'Unauthorized' });
+        }
+    } catch (err) {
+        res.json({ status: 'error', message: err.message });
+    }
+});
+
+// ฟังก์ชันสำหรับดึงข้อมูล roomDetail แบบ asynchronous
+function getRoomDetail(roomDetail) {
+    return new Promise((resolve, reject) => {
+        connection.execute('SELECT * FROM roomdetail WHERE roomdetail_id=?', [roomDetail], (err, results, fields) => {
+            if (err) {
+                reject(err);
+            } else {
+                if (results.length > 0) {
+                    resolve(results[0]);
+                } else {
+                    resolve(null);
+                }
+            }
+        });
+    });
+}
+// ฟังก์ชันสำหรับเพิ่มการจองแบบ asynchronous
+function addReservation(startTime, endTime, user_id, dateReserve, createReserve, updateReserve, roomDetail) {
+    return new Promise((resolve, reject) => {
+        connection.execute(
+            'INSERT INTO reservation (start_time, end_time, user_id, date_reservation, create_reservlog, update_reservlog, roomdetail_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [startTime, endTime, user_id, dateReserve, createReserve, updateReserve, roomDetail],
+            (err, results, fields) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(results);
+                }
+            }
+        );
+    });
+}
+// ฟังก์ชันสำหรับตรวจสอบว่าห้องว่างหรือไม่
+async function isRoomAvailable(roomDetail, dateReserve, startTime, endTime) {
+    // ดึงข้อมูลการจองสำหรับห้องและช่วงเวลาที่กำหนด
+    const reservations = await getReservationsForRoomAndDate(roomDetail, dateReserve, startTime, endTime);
+    
+    // ถ้าไม่มีการจองในช่วงเวลาที่กำหนด ห้องว่าง
+    return reservations.length === 0;
+}
+
+// ฟังก์ชันสำหรับดึงข้อมูลการจองสำหรับห้องและวันที่ที่กำหนด
+function getReservationsForRoomAndDate(roomDetail, dateReserve, startTime, endTime) {
+    return new Promise((resolve, reject) => {
+        connection.execute(
+            'SELECT * FROM reservation WHERE roomdetail_id=? AND date_reservation=? AND ((start_time <= ? AND end_time >= ?) OR (start_time <= ? AND end_time >= ?))',
+            [roomDetail, dateReserve, startTime, startTime, endTime, endTime],
+            (err, results, fields) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(results);
+                }
+            }
+        );
+    });
+}
+// Reservation-------------------------------------------------------------------------------------------------------------------
+
+// GetReservation-------------------------------------------------------------------------------------------------------------------
+app.get('/getreservations/:token', function (req, res) {
+    try {
+        const decode = jwt.verify(req.params.token, secret);
+        const { username } = decode;
+        connection.execute(
+            'SELECT * FROM reservation WHERE user_id IN (SELECT user_id FROM user_insystem WHERE user_username = ?)',
+            [username],
+            function (err, results) {
+                if (err) {
+                    res.json({ status: 'error', message: err });
+                    return;
+                }
+                if (results.length === 0) {
+                    res.json({ status: 'error', message: 'No reservations found for this user' });
+                    return;
+                }
+
+                // สร้างรายการข้อมูลการจอง
+                const reservations = results.map((result) => {
+                    return {
+                        start_time: result.start_time,
+                        end_time: result.end_time,
+                        room_id: result.roomdetail_id,
+                        date_reservation: result.date_reservation
+                    };
+                });
+
+                res.json({ status: 'ok', message: 'Success', reservations: reservations });
+                return;
+            }
+        );
+    } catch (err) {
+        res.json({ status: 'error', message: err.message });
+    }
+});
+// GetReservation-------------------------------------------------------------------------------------------------------------------
 app.listen(3333, function () {
   console.log('CORS-enabled web server listening on port 3333')
 })
