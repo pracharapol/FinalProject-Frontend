@@ -199,11 +199,11 @@ app.put('/newPassword', jsonParser, function (req, res) {
 // NewPassword-------------------------------------------------------------------------------------------------------------------
 
 // Reservation-------------------------------------------------------------------------------------------------------------------
-app.post('/reserveroom', jsonParser, async function (req, res) {
+app.post('/reserveroom/:roomdetail_id', jsonParser, async function (req, res) {
     try {
         const decode = jwt.verify(req.body.token, secret);
         const { username, user_id } = decode;
-        const roomDetail = req.body.roomdetail_id;
+        const roomDetail = req.params.roomdetail_id;
         
         if (username && user_id) {
             const startTime = req.body.start_time;
@@ -295,6 +295,29 @@ function getReservationsForRoomAndDate(roomDetail, dateReserve, startTime, endTi
 }
 // Reservation-------------------------------------------------------------------------------------------------------------------
 
+// Get Room URL-------------------------------------------------------------------------------------------------------------------
+app.get('/room/:room_id', async function (req, res) {
+    try {
+        const roomDetailId = req.params.room_id;
+        
+        if (roomDetailId) {
+            // ดึงข้อมูลห้องโดยใช้ Promise หรือฟังก์ชันที่เหมาะสม
+            const roomData = await getRoomDetail(roomDetailId);
+            
+            if (roomData) {
+                res.json({ status: 'ok', room: roomData });
+            } else {
+                res.json({ status: 'error', message: 'Room not found' });
+            }
+        } else {
+            res.json({ status: 'error', message: 'Invalid input data' });
+        }
+    } catch (err) {
+        res.json({ status: 'error', message: err.message });
+    }
+});
+// Get Room URL-------------------------------------------------------------------------------------------------------------------
+
 // GetReservation-------------------------------------------------------------------------------------------------------------------
 app.get('/getreservations/:token', function (req, res) {
     try {
@@ -332,6 +355,120 @@ app.get('/getreservations/:token', function (req, res) {
     }
 });
 // GetReservation-------------------------------------------------------------------------------------------------------------------
+
+//roomdetail---------------------------------------------------------------------------------------------------------------
+app.post('/roomdetail',jsonParser, (req, res) => {
+    const roomNum = req.body.room_num;
+    const statusRoom = req.body.status_room;
+    if (roomNum && statusRoom) {
+      connection.execute(
+        'INSERT INTO roomdetail (room_num,status_room) VALUES (?, ?)',
+        [roomNum,statusRoom],
+        function (err, results) {
+          if (err) {
+            return res.json({ status: 'error', message: err });
+          }
+          return res.json({ status: 'ok' });
+        }
+      );
+    } else {
+      return res.json({ status: 'error', message: 'Invalid input data' });
+    }
+  });
+  
+  app.put('/roomdetail/:roomdetail_id/:token', jsonParser, (req, res) => {
+    const roomDetailId = req.params.roomdetail_id;
+    const statusRoom = req.body.status_room;
+    const roomNumber = req.body.room_num;
+    if (roomDetailId && statusRoom && roomNumber) {
+      connection.execute(
+        'UPDATE roomdetail SET status_room = ? ,  room_num = ? WHERE roomdetail_id = ?',
+        [statusRoom, roomNumber,roomDetailId],
+        function (err, results) {
+          if (err) {
+            return res.json({ status: 'error', message: err });
+          }
+          return res.json({ status: 'ok' });
+        }
+      );
+    } else {
+      return res.json({ status: 'error', message: 'Invalid input data' });
+    }
+  });
+  
+  
+  //roomdetail---------------------------------------------------------------------------------------------------------------
+
+  //Cancel reservation---------------------------------------------------------------------------------------------------------------
+  app.delete('/cancelreservation/:reservation_id/:token', function (req, res) {
+    try {
+        const decode = jwt.verify(req.params.token, secret);
+        const { username } = decode;
+        const reservationId = req.params.reservation_id;
+
+        if (reservationId) {
+            // ตรวจสอบว่าผู้ใช้ที่ต้องการยกเลิกการจองเป็นเจ้าของการจอง
+            connection.execute(
+                'SELECT user_id FROM user_insystem WHERE user_username = ?',
+                [username],
+                function (err, results) {
+                    if (err) {
+                        res.json({ status: 'error', message: err });
+                        return;
+                    }
+
+                    if (results.length === 0) {
+                        res.json({ status: 'error', message: 'User not found' });
+                        return;
+                    }
+
+                    const userId = results[0].user_id;
+
+                    // ตรวจสอบว่าการจองที่ต้องการยกเลิกมี userId ตรงกับผู้ใช้ปัจจุบัน
+                    connection.execute(
+                        'SELECT user_id FROM reservation WHERE reservation_id = ?',
+                        [reservationId],
+                        function (err, results) {
+                            if (err) {
+                                res.json({ status: 'error', message: err });
+                                return;
+                            }
+
+                            if (results.length === 0) {
+                                res.json({ status: 'error', message: 'Reservation not found' });
+                                return;
+                            }
+
+                            if (results[0].user_id !== userId) {
+                                res.json({ status: 'error', message: 'You are not authorized to cancel this reservation' });
+                                return;
+                            }
+
+                            // ถ้าผู้ใช้มีสิทธิ์ยกเลิกการจอง ให้ลบการจอง
+                            connection.execute(
+                                'DELETE FROM reservation WHERE reservation_id = ?',
+                                [reservationId],
+                                function (err, results) {
+                                    if (err) {
+                                        res.json({ status: 'error', message: err });
+                                        return;
+                                    }
+
+                                    res.json({ status: 'ok', message: 'Reservation canceled successfully' });
+                                }
+                            );
+                        }
+                    );
+                }
+            );
+        } else {
+            res.json({ status: 'error', message: 'Invalid input data' });
+        }
+    } catch (err) {
+        res.json({ status: 'error', message: err.message });
+    }
+});
+  //Cancel reservation---------------------------------------------------------------------------------------------------------------
 app.listen(3333, function () {
   console.log('CORS-enabled web server listening on port 3333')
 })
