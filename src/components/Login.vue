@@ -1,3 +1,4 @@
+
 <template>
   <div class="image-container">
     <h1 style=" margin-top: -520px;width:200px;color: rgb(255, 255, 255);font-size: 40px;">WEBSITE NAME</h1>
@@ -8,11 +9,11 @@
     <form @submit.prevent="login">
       <div class="form-group">
         <label for="username" style="font-size: 20px;">Username</label>
-        <input class="inpuserpass" type="text" id="username" style="text-align: center;" v-model="username" required>
+        <input class="inpuserpass" type="text" id="username" style="text-align: center;" v-model="user_username" required>
       </div>
       <div class="form-group">
         <label for="password" style="font-size: 20px;">Password</label>
-        <input class="inpuserpass" type="password" id="password" style="text-align: center;" v-model="password" required>
+        <input class="inpuserpass" type="password" id="password" style="text-align: center;" v-model="user_password" required>
       </div>
       <button type="submit">Submit</button>
       <div class="click">Dont have account? <router-link to="/Register" class="here">Click here</router-link></div>
@@ -21,29 +22,45 @@
 </template>
 
 <script>
+import axios from 'axios';
 export default {
+  
   name: 'LoginForm', // ระบุชื่อของคอมโพเนนต์เป็น "LoginForm"
   data() {
     return {
-      username: '',
-      password: ''
+      user_username: '',
+      user_password: '',
     };
   },
   methods: {
-    login() {
-      // ในส่วนนี้คุณสามารถทำการตรวจสอบการเข้าสู่ระบบของผู้ใช้
-      // โดยตรวจสอบ username และ password จากข้อมูลในฐานข้อมูลหรือระบบของคุณ
-      // และทำการเปลี่ยนเส้นทางหรือดำเนินการที่เหมาะสมตามผลลัพธ์
+    login(event) {
+      event.preventDefault();
 
-      if (this.username === 'example' && this.password === 'password') {
-        // สำเร็จ: เข้าสู่ระบบและทำการเปลี่ยนเส้นทางไปยังหน้าอื่น
-        this.$router.push('/HomeComponent'); // ตัวอย่างการเปลี่ยนเส้นทางไปยังหน้า dashboard
-      } else {
-        // ไม่สำเร็จ: แสดงข้อความผิดพลาดหรือทำอย่างอื่นตามต้องการ
-        alert('Login failed. Please check your credentials.');
-      }
-    }
-  }
+      // ส่ง POST request เพื่อ login
+      axios
+        .post('http://localhost:3333/login', {
+          user_username: this.user_username,
+          user_password: this.user_password,
+        })
+        .then((response) => {
+          const data = response.data;
+          if (data.status === 'ok') {
+            // Login สำเร็จ
+            const token = data.token;
+            localStorage.setItem('token', token)
+            window.location = '/HomeComponent'
+          } else {
+            // Login ไม่สำเร็จ
+            const errorMessage = data.message;
+            alert(errorMessage)
+          }
+        })
+        .catch((error) => {
+          // กรณีเกิดข้อผิดพลาดในการส่ง request
+          console.error('Error:', error);
+        });
+    },
+  },
 };
 </script>
 

@@ -8,7 +8,12 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 var jwt = require('jsonwebtoken');
 const secret = "visiblepassword"
+const moment = require('moment-timezone');
+const thailandTimezone = 'Asia/Bangkok'; // โซนเวลาของประเทศไทย
+const nowThailand = moment().tz(thailandTimezone);
+
 app.use(cors())
+
 
 const mysql = require('mysql2');
 const req = require('express/lib/request');
@@ -469,6 +474,69 @@ app.post('/roomdetail',jsonParser, (req, res) => {
     }
 });
   //Cancel reservation---------------------------------------------------------------------------------------------------------------
+
+  //Get time reservation---------------------------------------------------------------------------------------------------------------
+  app.get('/checkanddelete/:roomdetail_id', function (req, res) {
+    try {
+        const roomDetailId = req.params.roomdetail_id;
+        
+        // คิวรีเรียกข้อมูลการจองในห้องที่ระบุ
+        connection.execute(
+            'SELECT * FROM reservation WHERE roomdetail_id = ?',
+            [roomDetailId],
+            function (err, results) {
+                if (err) {
+                    return res.json({ status: 'error', message: err });
+                }
+
+                const reservationsToDelete = [];
+                const reservationsToKeep = [];
+
+                results.forEach((reservation) => {
+                    const end_time = moment(reservation.end_time, 'HH:mm:ss');
+                    const date_reservation = moment(reservation.date_reservation, 'YYYY-MM-DD');
+
+                    if (end_time.isBefore(nowThailand) && date_reservation.isBefore(nowThailand)) {
+                        reservationsToDelete.push(reservation);
+                    } else {
+                        reservationsToKeep.push(reservation);
+                    }
+                });
+
+                if (reservationsToDelete.length > 0) {
+                    // ลูปผ่านการจองที่ต้องการลบและลบข้อมูลการจอง
+                    for (const reservation of reservationsToDelete) {
+                        connection.execute(
+                            'DELETE FROM reservation WHERE reservation_id = ?',
+                            [reservation.reservation_id],
+                            function (err, deleteResult) {
+                                if (err) {
+                                    return res.json({ status: 'error', message: err });
+                                }
+                            }
+                        );
+                    }
+                    return res.json({
+                        status: 'ok',
+                        message: 'Checked and deleted reservations for the room',
+                        reservationsToDelete: reservationsToDelete,
+                        reservationsToKeep: reservationsToKeep
+                    });
+                } else {
+                    return res.json({
+                        status: 'ok',
+                        message: 'No reservations to delete for the room',
+                        reservationsToDelete: [],
+                        reservationsToKeep: reservationsToKeep
+                    });
+                }
+            }
+        );
+    } catch (err) {
+        return res.json({ status: 'error', message: err.message });
+    }
+});
+//Get time reservation---------------------------------------------------------------------------------------------------------------
 app.listen(3333, function () {
   console.log('CORS-enabled web server listening on port 3333')
 })

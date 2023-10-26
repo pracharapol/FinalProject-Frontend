@@ -10,7 +10,7 @@
       <div class="Topic">
         <navHome class="HelpNavHome" />
         <h1>BEST CO-WORKING SPACE</h1>
-        <li><router-link to="/">Book</router-link></li>
+        <li><router-link to="/rooms">Book</router-link></li>
       </div>
     </div>
   </div>
