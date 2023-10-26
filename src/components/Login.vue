@@ -45,18 +45,16 @@ export default {
         .then((response) => {
           const data = response.data;
           if (data.status === 'ok') {
-            // Login สำเร็จ
             const token = data.token;
             localStorage.setItem('token', token)
             window.location = '/HomeComponent'
           } else {
-            // Login ไม่สำเร็จ
             const errorMessage = data.message;
             alert(errorMessage)
           }
         })
         .catch((error) => {
-          // กรณีเกิดข้อผิดพลาดในการส่ง request
+          
           console.error('Error:', error);
         });
     },
