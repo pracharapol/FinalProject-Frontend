@@ -321,7 +321,68 @@ app.get('/room/:room_id', async function (req, res) {
         res.json({ status: 'error', message: err.message });
     }
 });
+
+
+app.get('/room', (req, res) => {
+    connection.query('SELECT * FROM roomdetail', (err, results) => {
+      if (err) {
+        console.error('Error querying MySQL:', err);
+        res.status(500).json({ status: 'error', message: 'Failed to retrieve room list' });
+      } else {
+        // ปรับเปลี่ยนค่า status_room เป็นคำอธิบายที่เหมาะสม
+        const roomsWithStatusDescription = results.map((room) => {
+          if (room.status_room === 0) {
+            room.status_room = 'booked';
+          } else if (room.status_room === 1) {
+            room.status_room = 'available';
+          }
+          return room;
+        });
+  
+        res.status(200).json({ status: 'ok', rooms: roomsWithStatusDescription });
+      }
+    });
+  });
 // Get Room URL-------------------------------------------------------------------------------------------------------------------
+
+// API endpoint สำหรับอัปเดต status_room จากฐานข้อมูล reservation--------------------------------------------------------------------
+function updateRoomStatus(roomdetail_id, status) {
+    connection.query('UPDATE roomdetail SET status_room = ? WHERE roomdetail_id = ?', [status, roomdetail_id], (err) => {
+      if (err) {
+        console.error(`Failed to update status for room ${roomdetail_id}`, err);
+      }
+    });
+  }
+  function compareAndUpdateRoomStatus() {
+    connection.query('SELECT roomdetail_id, start_time, end_time, date_reservation FROM reservation', (err, results) => {
+      if (err) {
+        console.error('Failed to fetch reservation data', err);
+        return;
+      }
+      
+      results.forEach((result) => {
+        const { roomdetail_id, start_time, end_time, date_reservation } = result;
+        const startTime = moment(start_time, 'HH:mm:ss').format('HH:mm:ss');
+        const datereservationTime = moment(date_reservation, 'YYYY-MM-DD').format('YYYY-MM-DD');
+        const reservationTime = moment(datereservationTime + 'T' + startTime).format('YYYY-MM-DD'+'T'+'HH:mm:ss');
+        const endTime1 = moment(end_time, 'HH:mm:ss').format('HH:mm:ss');
+        const endTime = moment(datereservationTime + 'T' + endTime1).format('YYYY-MM-DD'+'T'+'HH:mm:ss');
+  
+        if (nowThailand.format('YYYY-MM-DD'+'T'+'HH:mm:ss') >= reservationTime && nowThailand.format('YYYY-MM-DD'+'T'+'HH:mm:ss') <= endTime) {
+          updateRoomStatus(roomdetail_id, 0);
+        } else {
+          updateRoomStatus(roomdetail_id, 1);
+        }
+      });
+    });
+  }
+
+  app.put('/update-room-status', (req, res) => {
+    compareAndUpdateRoomStatus();
+    res.status(200).json({ status: 'ok' });
+  });
+  
+// API endpoint สำหรับอัปเดต status_room จากฐานข้อมูล reservation--------------------------------------------------------------------
 
 // GetReservation-------------------------------------------------------------------------------------------------------------------
 app.get('/getreservations/:token', function (req, res) {
@@ -365,10 +426,12 @@ app.get('/getreservations/:token', function (req, res) {
 app.post('/roomdetail',jsonParser, (req, res) => {
     const roomNum = req.body.room_num;
     const statusRoom = req.body.status_room;
-    if (roomNum && statusRoom) {
+    const roomDesc = req.body.roomdetail_desc;
+    const roomPerson = req.body.room_person;
+    if (roomNum && statusRoom && roomPerson && roomDesc) {
       connection.execute(
-        'INSERT INTO roomdetail (room_num,status_room) VALUES (?, ?)',
-        [roomNum,statusRoom],
+        'INSERT INTO roomdetail (room_num, status_room, roomdetail_desc, room_person) VALUES (?, ?, ?, ?)',
+        [roomNum,statusRoom,roomDesc,roomPerson],
         function (err, results) {
           if (err) {
             return res.json({ status: 'error', message: err });
@@ -498,8 +561,10 @@ app.post('/roomdetail',jsonParser, (req, res) => {
 
                     if (end_time.isBefore(nowThailand) && date_reservation.isBefore(nowThailand)) {
                         reservationsToDelete.push(reservation);
+                        console.log(end_time)
                     } else {
                         reservationsToKeep.push(reservation);
+                        console.log(end_time)
                     }
                 });
 
@@ -520,14 +585,16 @@ app.post('/roomdetail',jsonParser, (req, res) => {
                         status: 'ok',
                         message: 'Checked and deleted reservations for the room',
                         reservationsToDelete: reservationsToDelete,
-                        reservationsToKeep: reservationsToKeep
+                        reservationsToKeep: reservationsToKeep,
+                        nowThailand: nowThailand.format()
                     });
                 } else {
                     return res.json({
                         status: 'ok',
                         message: 'No reservations to delete for the room',
                         reservationsToDelete: [],
-                        reservationsToKeep: reservationsToKeep
+                        reservationsToKeep: reservationsToKeep,
+                        nowThailand: nowThailand.format()
                     });
                 }
             }
@@ -537,6 +604,13 @@ app.post('/roomdetail',jsonParser, (req, res) => {
     }
 });
 //Get time reservation---------------------------------------------------------------------------------------------------------------
+
+//setInterval------------------------------------------------------------------------------------------------------------------------
+const updateInterval = 5 * 60 * 1000; // 5 นาทีในมิลลิวินาที
+setInterval(compareAndUpdateRoomStatus, updateInterval);
+compareAndUpdateRoomStatus();
+//setInterval------------------------------------------------------------------------------------------------------------------------
+
 app.listen(3333, function () {
   console.log('CORS-enabled web server listening on port 3333')
 })

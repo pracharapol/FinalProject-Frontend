@@ -3,7 +3,7 @@
       <div class="content1">
           <h1 style="text-align: center; font-size: 40px; font-weight: bold; margin-top: 20px; color: #000000;">KongTel</h1>
           <div class="text-form"><router-link to="/HomeComponent">Home</router-link></div>
-          <div class="text-form2"><router-link to="/rooms">Room&nbsp;&nbsp;&nbsp;></router-link></div>
+          <div class="text-form2"><router-link to="/room">Room&nbsp;&nbsp;&nbsp;></router-link></div>
       </div>
       <div class="content2">
       <h2 style="text-align: left; font-size: 30px; font-weight: bold; margin-top: 20px; color: #000000; padding-left: 5%;">Rooms List</h2>
@@ -20,74 +20,60 @@
         <div style="width: 33%;">Facility</div>
         <div style="width: 20%;">Status</div>
       </div>
-
-      <div class="detailroomshow">
-        <div style="width: 20%;">
-          <img class="Imgrooms" src="../assets/Room8person-Home.jpg" alt="roomtwo"/>
-        </div>
-        <div style="width: 15%;">
-        <h3 style="font-size: 20px; color: #0047FF; margin-top: 25%;">#001</h3>
-        <h3 style="font-size: 20px; color: #5D5D5D;">Room One</h3>
-        </div>
-        <div style="width: 12%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 45%; margin-left: 5%;">4</h3></div>
-        <div style="width: 33%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 10%;">Free Wifi ,Free Computer, Free Snack, Access Control , Snack and Bar</h3></div>
-        <div style="width: 16%; margin-bottom: 20px;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 35%; color: #00A41A;">Available</h3></div>
-      </div>
-
-      <div class="detailroomshow">
-        <div style="width: 20%;">
-          <img class="Imgrooms" src="../assets/Room8person-Home.jpg" alt="roomtwo"/>
-        </div>
-        <div style="width: 15%;">
-        <h3 style="font-size: 20px; color: #0047FF; margin-top: 25%;">#001</h3>
-        <h3 style="font-size: 20px; color: #5D5D5D;">Room One</h3>
-        </div>
-        <div style="width: 12%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 45%; margin-left: 5%;">4</h3></div>
-        <div style="width: 33%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 10%;">Free Wifi ,Free Computer, Free Snack, Access Control , Snack and Bar</h3></div>
-        <div style="width: 16%; margin-bottom: 20px;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 35%; color: #FF0000;">Booked</h3></div>
-      </div>
-
-      <div class="detailroomshow">
-        <div style="width: 20%;">
-          <img class="Imgrooms" src="../assets/Room8person-Home.jpg" alt="roomtwo"/>
-        </div>
-        <div style="width: 15%;">
-        <h3 style="font-size: 20px; color: #0047FF; margin-top: 25%;">#001</h3>
-        <h3 style="font-size: 20px; color: #5D5D5D;">Room One</h3>
-        </div>
-        <div style="width: 12%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 45%; margin-left: 5%;">4</h3></div>
-        <div style="width: 33%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 10%;">Free Wifi ,Free Computer, Free Snack, Access Control , Snack and Bar</h3></div>
-        <div style="width: 16%; margin-bottom: 20px;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 35%; color: #FF0000;">Booked</h3></div>
-      </div>
-
-      <div class="detailroomshow">
-        <div style="width: 20%;">
-          <img class="Imgrooms" src="../assets/Room8person-Home.jpg" alt="roomtwo"/>
-        </div>
-        <div style="width: 15%;">
-        <h3 style="font-size: 20px; color: #0047FF; margin-top: 25%;">#001</h3>
-        <h3 style="font-size: 20px; color: #5D5D5D;">Room One</h3>
-        </div>
-        <div style="width: 12%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 45%; margin-left: 5%;">4</h3></div>
-        <div style="width: 33%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 10%;">Free Wifi ,Free Computer, Free Snack, Access Control , Snack and Bar</h3></div>
-        <div style="width: 16%; margin-bottom: 20px;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 35%; color: #FF0000;">Booked</h3></div>
-      </div>
       
-
-
-
-
-
+            <router-link :to="'/room/' + room.roomdetail_id" v-for="room in rooms" :key="room.roomdetail_id" class="detailroomshow">
+            <div style="width: 20%;">
+              <img class="Imgrooms" src="../assets/Room8person-Home.jpg" alt="roomtwo" />
+            </div>
+            <div style="width: 15%;">
+              <h3 style="font-size: 20px; color: #0047FF; margin-top: 25%;">{{ room.room_num }}</h3>
+              <h3 style="font-size: 20px; color: #5D5D5D;">Room {{ room.room_num }}</h3>
+            </div>
+            <div style="width: 12%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 45%; margin-left: 5%;">{{ room.room_person }}</h3></div>
+            <div style="width: 33%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 10%; margin-right: 10%;">{{ room.roomdetail_desc }}</h3></div>
+            <div style="width: 16%; margin-bottom: 20px;"><h3 :style="statusStyle(room.status_room)" class="statusRoom">{{ room.status_room }}</h3></div>
+            </router-link>
+            
     </div>
   </div>
   </template>
-  <script>
+<script>
+import axios from 'axios';
 
-  export default {
-    name: 'Room-Detail',
-    }
-  
-  </script>
+export default {
+  name: 'Room-Detail',
+  data() {
+    return {
+      rooms: [],
+    };
+  },
+  created() {
+    this.fetchRoomData(); 
+  },
+  methods: {
+    statusStyle(status) {
+      if (status === 'booked') {
+        return { color: 'red' };
+      }
+      return {};
+    },
+    fetchRoomData() {
+      axios
+        .get('http://localhost:3333/room')
+        .then((response) => {
+          this.rooms = response.data.rooms;
+          console.log(response.data.rooms);
+        })
+        .catch((error) => {
+          console.error('Failed to retrieve room list.', error);
+        });
+    },
+  },
+  mounted() {
+    setInterval(this.fetchRoomData, 5 * 60 * 1000);
+  },
+};
+</script>
   <style scoped>
   .bodyroom {
     
@@ -117,7 +103,11 @@
     overflow: auto; /* เพิ่มการเลื่อนในทิศทางที่คุณต้องการ */
   overflow-y: scroll; /* เลื่อนแนวตั้ง */
   }
-  
+  .statusRoom{
+    font-size: 20px;
+    margin-top: 35%; 
+    color: #00A41A;
+  }
   
 
   .text-form{
@@ -199,6 +189,7 @@
   margin-left: 46px;
   text-align: left;
   margin-top: 20px;
+  text-decoration: none;
 
 }
 .Imgrooms{

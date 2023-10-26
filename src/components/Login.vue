@@ -89,6 +89,7 @@ export default {
   height: 100vh;
   width:100%;
   background: url(../assets/firstPagePic.png) no-repeat center center;
+  filter: brightness(0.7);
   background-size: cover;
   overflow: hidden;
   
