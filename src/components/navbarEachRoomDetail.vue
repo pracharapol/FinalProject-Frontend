@@ -1,16 +1,16 @@
 <template>
   <nav id="navDetail">
     <li>
-      <router-link to="/DetailPage">Overviews</router-link>
+      <router-link :to="'/room/' + room.roomdetail_id">Overviews</router-link>
     </li>
     <li>
-      <router-link to="/DetailPage/rooms">Rooms</router-link>
+      <router-link :to="'/room/' + room.roomdetail_id + '/rooms'">Rooms</router-link>
     </li>
     <li>
-      <router-link to="/DetailPage/facilities">Facilities</router-link>
+      <router-link :to="'/room/' + room.roomdetail_id + '/facilities'">Facilities</router-link>
     </li>
     <li>
-      <router-link to="/DetailPage/policy">Policy</router-link>
+      <router-link :to="'/room/' + room.roomdetail_id + '/policy'">Policy</router-link>
     </li>
     <div>
       <div v-if="showOverView" class="detailOverview">
@@ -47,19 +47,19 @@
       </div>
 
       <div
-        v-if="!showOverView && currentRoute === '/DetailPage/rooms'"
+        v-if="!showOverView && currentRoute === '/room/' + room.roomdetail_id + '/rooms'"
         class="detailOverview"
       >
         Room here
       </div>
       <div
-        v-if="!showOverView && currentRoute === '/DetailPage/facilities'"
+        v-if="!showOverView && currentRoute === '/room/' + room.roomdetail_id + '/facilities'"
         class="detailOverview"
       >
         ficilities here
       </div>
       <div
-        v-if="!showOverView && currentRoute === '/DetailPage/policy'"
+        v-if="!showOverView && currentRoute === '/room/' + room.roomdetail_id + '/policy'"
         class="detailOverview"
       >
         policy here
@@ -68,6 +68,7 @@
   </nav>
 </template>
 <script>
+import axios from 'axios';
 export default {
   name: "navDetail",
   props: {
@@ -76,22 +77,50 @@ export default {
   data() {
     return {
       showOverView: true,
+      room: {},
+      rooms: [],
     };
   },
-  watch: {
-    $route(to) {
-      // เมื่อ URL เปลี่ยน
-      if (to.path === "/DetailPage/rooms") {
-        this.showOverView = false;
-      } else if (to.path === "/DetailPage/facilities") {
-        this.showOverView = false;
-      } else if (to.path === "/DetailPage/policy") {
-        this.showOverView = false;
-      } else {
-        this.showOverView = true;
-      }
+  created() {
+      const roomDetailId = this.$route.params.roomdetail_id;
+      
+      // เรียก API เพื่อดึงข้อมูลห้อง
+      axios
+        .get(`http://localhost:3333/room/${roomDetailId}`)
+        .then((response) => {
+          this.room = response.data.room;
+        })
+        .catch((error) => {
+          console.error('Failed to retrieve room details.', error);
+        });this.fetchRoomData();
     },
+    watch: {
+  $route(to) {
+    // เมื่อ URL เปลี่ยน
+    if (to.path === '/room/' + this.$route.params.roomdetail_id + '/rooms') {
+      this.showOverView = false;
+    } else if (to.path === '/room/' + this.$route.params.roomdetail_id + '/facilities') {
+      this.showOverView = false;
+    } else if (to.path === '/room/' + this.$route.params.roomdetail_id + '/policy') {
+      this.showOverView = false;
+    } else {
+      this.showOverView = true;
+    }
   },
+},
+methods: {
+  fetchRoomData() {
+      axios
+        .get('http://localhost:3333/room')
+        .then((response) => {
+          this.rooms = response.data.rooms;
+          console.log(response.data.rooms);
+        })
+        .catch((error) => {
+          console.error('Failed to retrieve room list.', error);
+        });
+    },
+}
 };
 </script>
 <style scoped>

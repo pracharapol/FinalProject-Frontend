@@ -1,5 +1,7 @@
 <template>
+  <navbarLogin/>
   <div class="container">
+    
     <img
       alt="Hometoppic"
       src="../assets/Hometoppic_auto_x2.jpg"
@@ -8,8 +10,8 @@
 
     <div class="Topic-container">
       <div class="Topic">
-        <navHome class="HelpNavHome" />
-        <h1>BEST CO-WORKING SPACE</h1>
+        <!-- <navHome class="HelpNavHome" /> -->
+        <h1 style="margin-top:30px ;">BEST CO-WORKING SPACE</h1>
         <li><router-link to="/room">Book</router-link></li>
       </div>
     </div>
@@ -26,10 +28,9 @@
   </div>
   <h1 style="margin-top: 120px; margin-left: 40px">Recommended Rooms</h1>
 
-  <!-- <img alt="pic8personal" src="../assets/Room8person-Home.jpg" class="Helppic8personal"/> -->
 
-  <div style="padding-left: 40px">
-    <div class="containers" style="margin-top: 60px">
+  <div v-for="(room, index) in rooms" :key="room.roomdetail_id" style="padding-left: 40px">
+    <div class="containers" style="margin-top: 60px" v-if="index < 2">
       <div class="left-side">
         <img
           alt="pic4personal"
@@ -38,78 +39,60 @@
         />
       </div>
       <div class="right-side">
-        <h2 class="detailPicOneTopic">Room One</h2>
+        <h2 class="detailPicOneTopic">Room {{room.room_num}}</h2>
         <p class="detailPicOneDetail">
-          We extend a warm invitation to all members of our company's team to
-          make use of our well-appointed meeting room facilities. Our meeting
-          rooms are fully equipped to accommodate a wide range of professional
-          needs, whether it be for important strategy sessions, creative
-          brainstorming, or addressing critical matters.With a conducive
-          environment, modern amenities, and a dedicated team for assistance, we
-          aim to provide you with a seamless and productive meeting experience.
-          Don't hesitate to contact us for reservations or further details;
-          we're eager to host your team and contribute to the success of your
-          future endeavors .
+          We invite all members of the company's team to use our well-appointed meeting rooms. Our meeting rooms are fully 
+          equipped to accommodate a wide range of professional needs, whether it's critical strategy meetings, creative brainstorming 
+          or dealing with important matters. With favorable environment, modern facilities.
         </p>
+        <p class="detailPicOneDetail">
+          {{ room.roomdetail_desc }}
+        </p>
+        <h2 class="detailPicOneDetail">
+          status: <span :style="statusStyle(room.status_room)" class="statusGreen">{{ room.status_room }}</span>
+        </h2>
+        <h2 class="detailPicOneDetail">
+          {{ room.room_person }} <span>persons</span>
+        </h2>
         <li style="margin-left: -12px">
-          <router-link to="/DetailPage">See Detail</router-link>
-        </li>
-      </div>
-    </div>
-    <div class="containers" style="margin-top: 60px">
-      <div class="right-side-two">
-        <img
-          alt="pic4personal"
-          src="../assets/Room8person-Home.jpg"
-          class="Helppic8personal"
-        />
-      </div>
-      <div class="left-side-two">
-        <h2 class="detailPicOneTopic">Room Two</h2>
-        <p class="detailPicOneDetail">
-          We extend a warm invitation to all members of our company's team to
-          make use of our well-appointed meeting room facilities. Our meeting
-          rooms are fully equipped to accommodate a wide range of professional
-          needs, whether it be for important strategy sessions, creative
-          brainstorming, or addressing critical matters.With a conducive
-          environment, modern amenities, and a dedicated team for assistance, we
-          aim to provide you with a seamless and productive meeting experience.
-          Don't hesitate to contact us for reservations or further details;
-          we're eager to host your team and contribute to the success of your
-          future endeavors .
-        </p>
-        <li style="margin-left: 12px">
-          <router-link to="/DetailPage">See Detail</router-link>
+          <router-link :to="'/room/' + room.roomdetail_id">See Detail</router-link>
         </li>
       </div>
     </div>
   </div>
-  <div style="margin-top: 100px" class="containerforpicture">
+
+<div v-for="(room, index) in rooms" :key="room.roomdetail_id">
+  <div v-if="index == 2" style="margin-top: 100px" class="containerforpicture" >
     <img
       alt="pic10personal"
       src="../assets/Room10person-Home.jpg"
       class="Helppic10personal"
     />
-    <h2 style="text-align: center">Room Three</h2>
+    <h2 style="text-align: center">Room {{room.room_num}}</h2>
     <div class="detailPicThreeDetail">
       <p>
-        We extend a warm invitation to all members of our company's team to make
-        use of our well-appointed meeting room facilities. Our meeting rooms are
-        fully equipped to accommodate a wide range of professional needs,
-        whether it be for important strategy sessions, creative brainstorming,
-        or addressing critical matters.With a conducive environment, modern
-        amenities, and a dedicated team for assistance, we aim to provide you
-        with a seamless and productive meeting experience. Don't hesitate to
-        contact us for reservations or further details; we're eager to host your
-        team and contribute to the success of your future endeavors .
-      </p>
+          We invite all members of the company's team to use our well-appointed meeting rooms. Our meeting rooms are fully 
+          equipped to accommodate a wide range of professional needs, whether it's critical strategy meetings, creative brainstorming 
+          or dealing with important matters. With favorable environment, modern facilities.
+        </p>
+    </div>
+    <p >
+          {{ room.roomdetail_desc }}
+        </p>
+        <h2 >
+          status: <span :style="statusStyle(room.status_room)" class="statusGreen">{{ room.status_room }}</span>
+        </h2>
+        <h2 style="margin-bottom: 50px;">
+          {{ room.room_person }} <span>persons</span>
+        </h2>
+    <div class="seeDetailPicThree">
+    <li style="margin-top: -40px">
+      <router-link :to="'/room/' + room.roomdetail_id">See Detail</router-link>
+    </li>
     </div>
   </div>
-  <div class="seeDetailPicThree">
-    <li style="margin-top: -40px">
-      <router-link to="/DetailPage">See Detail</router-link>
-    </li>
-  </div>
+</div>
+
   <div class="bottom-bar">
     <div style="margin-left: 170px">
       <div style="text-align: left; padding-top: 50px; color: white">
@@ -190,12 +173,44 @@
 </template>
 
 <script>
-import navHome from "./navbarHome.vue";
+import axios from 'axios';
+import navbarLogin  from '@/components/navbarLogin.vue'
 
 export default {
   name: "HomePage",
   components: {
-    navHome,
+    navbarLogin,
+    
+  },
+  data() {
+    return {
+      rooms: [],
+    };
+  },
+  created() {
+    this.fetchRoomData(); 
+  },
+  methods: {
+    statusStyle(status) {
+      if (status === 'booked') {
+        return { color: 'red' };
+      }
+      return {};
+    },
+    fetchRoomData() {
+      axios
+        .get('http://localhost:3333/room')
+        .then((response) => {
+          this.rooms = response.data.rooms;
+          console.log(response.data.rooms);
+        })
+        .catch((error) => {
+          console.error('Failed to retrieve room list.', error);
+        });
+    },
+  },
+  mounted() {
+    setInterval(this.fetchRoomData, 5 * 60 * 1000);
   },
 };
 </script>
@@ -207,12 +222,12 @@ export default {
   height: 600px;
   text-align: center;
   overflow: hidden;
-  margin-top: -100px;
+  margin-top: -10px;
 }
 .containerforpicture {
   position: relative;
   width: 100%;
-  height: 800px;
+  height: auto;
   text-align: center;
   overflow: hidden;
   margin-top: -100px;
@@ -302,12 +317,12 @@ export default {
 .Topic li {
   position: absolute;
   top: 200px;
-  left: 40%;
+  left: 35%;
 }
 .Topic li a {
   color: rgb(255, 255, 255);
   background-color: black;
-  border-radius: 60px;
+  border-radius: 40px;
   font-size: 26px;
 }
 .Topic li a:hover {
@@ -353,13 +368,9 @@ export default {
   height: 450px;
   border-radius: 20px;
 }
-/* .Helppic10personal{
-  margin-right:0px;
- padding-top:0px;
- width: 650px;
- height: 450px;
-
-} */
+.statusGreen{
+  color: green;
+}
 .full-screen-image {
   width: 100%;
   height: 100%;
@@ -368,7 +379,7 @@ export default {
 }
 .Helppic10personal {
   width: 84%;
-  height: 70%;
+  height: 500px;
   object-fit: cover;
   border-radius: 20px;
 }

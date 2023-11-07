@@ -8,32 +8,80 @@
       <div class="content2">
       <h2 style="text-align: left; font-size: 30px; font-weight: bold; margin-top: 20px; color: #000000; padding-left: 5%;">Rooms List</h2>
       <div class="topnav">
-        <a href="#home">All Room(59)</a>
-        <a href="#about">Available Room(20)</a>
-        <a href="#contact">Booked(10)</a>
-        <input type="text" placeholder="🔎Search..">
+        <a href="#allrooms" @click="showAllRooms">All Room({{allRooms.length}})</a>
+        <a href="#availableRooms" @click="showAvailableRooms">Available Room({{ availableRooms.length }})</a>
+        <a href="#bookedRooms" @click="showBookedRooms">Booked({{bookedRooms.length}})</a>
+        <input type="text" v-model="searchQuery" placeholder="🔎 Search.." @input="filterRooms" @keypress="showSearchRooms"/>
       </div>
 
       <div class="showheader">
         <div style="width: 35%;">Room Name</div>
         <div style="width: 12%;">Persons</div>
         <div style="width: 33%;">Facility</div>
-        <div style="width: 20%;">Status</div>
+        <div style="width: 16%;">Status</div>
       </div>
-      
-            <router-link :to="'/room/' + room.roomdetail_id" v-for="room in rooms" :key="room.roomdetail_id" class="detailroomshow">
+
+
+        <div v-if="showAllRoom" style="width: 100%; height: 100%;">
+          <router-link :to="'/room/' + room.roomdetail_id" v-for="room in rooms" :key="room.roomdetail_id" class="detailroomshow">
             <div style="width: 20%;">
               <img class="Imgrooms" src="../assets/Room8person-Home.jpg" alt="roomtwo" />
             </div>
             <div style="width: 15%;">
-              <h3 style="font-size: 20px; color: #0047FF; margin-top: 25%;">{{ room.room_num }}</h3>
+              <h3 style="font-size: 20px; color: #00A41A; margin-top: 25%;">{{ room.room_num }}</h3>
               <h3 style="font-size: 20px; color: #5D5D5D;">Room {{ room.room_num }}</h3>
             </div>
             <div style="width: 12%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 45%; margin-left: 5%;">{{ room.room_person }}</h3></div>
             <div style="width: 33%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 10%; margin-right: 10%;">{{ room.roomdetail_desc }}</h3></div>
             <div style="width: 16%; margin-bottom: 20px;"><h3 :style="statusStyle(room.status_room)" class="statusRoom">{{ room.status_room }}</h3></div>
-            </router-link>
-            
+          </router-link>
+        </div>
+
+        <div v-if="showAvailableRoom" style="width: 100%; height: 100%;">
+          <router-link :to="'/room/' + room.roomdetail_id" v-for="room in availableRooms" :key="room.roomdetail_id" class="detailroomshow">
+            <div style="width: 20%;">
+              <img class="Imgrooms" src="../assets/Room8person-Home.jpg" alt="roomtwo" />
+            </div>
+            <div style="width: 15%;">
+              <h3 style="font-size: 20px; color: #00A41A; margin-top: 25%;">{{ room.room_num }}</h3>
+              <h3 style="font-size: 20px; color: #5D5D5D;">Room {{ room.room_num }}</h3>
+            </div>
+            <div style="width: 12%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 45%; margin-left: 5%;">{{ room.room_person }}</h3></div>
+            <div style="width: 33%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 10%; margin-right: 10%;">{{ room.roomdetail_desc }}</h3></div>
+            <div style="width: 16%; margin-bottom: 20px;"><h3 :style="statusStyle(room.status_room)" class="statusRoom">{{ room.status_room }}</h3></div>
+          </router-link>
+        </div>
+
+        <div v-if="showBookedRoom" style="width: 100%; height: 100%;">
+          <router-link :to="'/room/' + room.roomdetail_id" v-for="room in bookedRooms" :key="room.roomdetail_id" class="detailroomshow">
+            <div style="width: 20%;">
+              <img class="Imgrooms" src="../assets/Room8person-Home.jpg" alt="roomtwo" />
+            </div>
+            <div style="width: 15%;">
+              <h3 style="font-size: 20px; color: #00A41A; margin-top: 25%;">{{ room.room_num }}</h3>
+              <h3 style="font-size: 20px; color: #5D5D5D;">Room {{ room.room_num }}</h3>
+            </div>
+            <div style="width: 12%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 45%; margin-left: 5%;">{{ room.room_person }}</h3></div>
+            <div style="width: 33%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 10%; margin-right: 10%;">{{ room.roomdetail_desc }}</h3></div>
+            <div style="width: 16%; margin-bottom: 20px;"><h3 :style="statusStyle(room.status_room)" class="statusRoom">{{ room.status_room }}</h3></div>
+          </router-link>
+        </div>
+
+        <div v-if="showSearchRoom" style="width: 100%; height: 100%;">
+          <router-link :to="'/room/' + room.roomdetail_id" v-for="room in filteredRooms" :key="room.roomdetail_id" class="detailroomshow">
+              <div style="width: 20%;">
+              <img class="Imgrooms" src="../assets/Room8person-Home.jpg" alt="roomtwo" />
+            </div>
+            <div style="width: 15%;">
+              <h3 style="font-size: 20px; color: #00A41A; margin-top: 25%;">{{ room.room_num }}</h3>
+              <h3 style="font-size: 20px; color: #5D5D5D;">Room {{ room.room_num }}</h3>
+            </div>
+            <div style="width: 12%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 45%; margin-left: 5%;">{{ room.room_person }}</h3></div>
+            <div style="width: 33%;"><h3 style="font-size: 20px; color: #5D5D5D; margin-top: 10%; margin-right: 10%;">{{ room.roomdetail_desc }}</h3></div>
+            <div style="width: 16%; margin-bottom: 20px;"><h3 :style="statusStyle(room.status_room)" class="statusRoom">{{ room.status_room }}</h3></div>
+          </router-link>
+        </div>
+
     </div>
   </div>
   </template>
@@ -41,10 +89,16 @@
 import axios from 'axios';
 
 export default {
-  name: 'Room-Detail',
+  name: 'Room-list',
   data() {
     return {
       rooms: [],
+      showAvailableRoom: false,
+      showAllRoom: true,
+      showBookedRoom: false,
+      showSearchRoom: false,
+      searchQuery: '',
+      filteredRooms: [],
     };
   },
   created() {
@@ -68,21 +122,62 @@ export default {
           console.error('Failed to retrieve room list.', error);
         });
     },
+    showAllRooms() {
+      this.showAllRoom = true;
+      this.showAvailableRoom = false;
+      this.showBookedRoom = false;
+    },
+    showAvailableRooms() {
+      this.showAllRoom = false;
+      this.showAvailableRoom = true;
+      this.showBookedRoom = false;
+    },
+    showBookedRooms() {
+      this.showAllRoom = false;
+      this.showAvailableRoom = false;
+      this.showBookedRoom = true;
+    },
+    showSearchRooms() {
+      this.showAllRoom = false;
+      this.showAvailableRoom = false;
+      this.showBookedRoom = false;
+      this.showSearchRoom = true;
+    },
+    filterRooms() {
+  const query = this.searchQuery.toLowerCase();
+  const filteredRooms = this.rooms.filter((room) =>
+    (Number.isInteger(room.room_num) && room.room_num.toString().includes(query)) ||
+    (typeof room.roomdetail_desc === 'string' && room.roomdetail_desc.toLowerCase().includes(query)) ||
+    (Number.isInteger(room.room_person) && room.room_person.toString().includes(query))
+  );
+
+  this.filteredRooms = filteredRooms;
+  console.log('Filtered Rooms:', this.filteredRooms);
+}
   },
   mounted() {
     setInterval(this.fetchRoomData, 5 * 60 * 1000);
+  },
+  computed: {
+    availableRooms() {
+      return this.rooms.filter(room => room.status_room === 'available');
+    },
+    bookedRooms() {
+      return this.rooms.filter(room => room.status_room === 'booked');
+    },
+    allRooms() {
+      return this.rooms;
+    },
   },
 };
 </script>
   <style scoped>
   .bodyroom {
-    
     margin: 0;
     padding: 0;
     height: 100vh;
     display: flex;
   }
-  
   .content1 {
     width: 25%;
     background-color: #F5F0E8;
@@ -90,7 +185,6 @@ export default {
     padding: 0;
     overflow: hidden;
     border-bottom: 2px solid #C5BDBD;
-    
   }
   .content2 {
     width: 75%;
@@ -99,17 +193,14 @@ export default {
     padding: 0;
     overflow: hidden;
     border-bottom: 2px solid #C5BDBD;
-    
     overflow: auto; /* เพิ่มการเลื่อนในทิศทางที่คุณต้องการ */
-  overflow-y: scroll; /* เลื่อนแนวตั้ง */
+    overflow-y: scroll; /* เลื่อนแนวตั้ง */
   }
   .statusRoom{
     font-size: 20px;
     margin-top: 35%; 
     color: #00A41A;
   }
-  
-
   .text-form{
     margin-top: 100px;
     padding-left: 20px;
@@ -123,7 +214,6 @@ export default {
     font-size: 30px;
     text-align: center;
   }
-
   .text-form2{
     margin-top: 30px;
     padding-left: 20px;
@@ -141,9 +231,8 @@ export default {
   }
   .topnav {
     margin-top: 50px;
-  overflow: hidden;
-  background-color: #ffffff;
-  
+    overflow: hidden;
+    background-color: #ffffff;
 }
 .topnav a {
   float: left;
@@ -158,8 +247,8 @@ export default {
 .topnav a:hover {
   text-decoration: underline;
   color: black;
+  transition: 0.5s;
 }
-
 .topnav input[type=text] {
   float: right;
   padding: 6px;
@@ -190,7 +279,12 @@ export default {
   text-align: left;
   margin-top: 20px;
   text-decoration: none;
+  border-radius: 10px;
 
+}
+.detailroomshow:hover{
+  background-color: #c6c6c6;
+  transition: 0.5s;
 }
 .Imgrooms{
   background-size: cover;

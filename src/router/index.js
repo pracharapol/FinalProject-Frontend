@@ -4,9 +4,9 @@ import Profile from '../views/ProfileView.vue'
 import HomeComponent from '../components/Home.vue'
 import Register from '../components/register.vue'
 import Login from '../components/Login.vue'
-import DetailPage from '../components/DetailEachRoom.vue'
 import BlankPage from '../components/BlankPage.vue'
 import rooms from '../components/rooms.vue'
+import roomdetail from '../components/roomdetail.vue'
 
 
 const routes = [
@@ -19,6 +19,30 @@ const routes = [
     path: '/room',
     name: 'rooms',
     component: rooms
+  },
+  {
+    path: '/room/:roomdetail_id',
+    name: 'room-detail',
+    component: roomdetail,
+    children: [
+      {
+        path: '', 
+        component: BlankPage, 
+      },
+      {
+        path: 'rooms', 
+        component:  BlankPage,
+      },
+      {
+        path: 'facilities', 
+        component:  BlankPage,
+      },
+      {
+        path: 'policy', 
+        component:  BlankPage,
+      },
+      // ...
+    ],
   },
   {
     path: '/Login',
@@ -54,30 +78,6 @@ const routes = [
     path:'/HomeComponent',
     name:'HomeComponent',
     component:HomeComponent,
-  },
-  {
-    path:'/DetailPage',
-    name:'DetailPage',
-    component:DetailPage,
-    children: [
-      {
-        path: '', 
-        component: BlankPage, 
-      },
-      {
-        path: 'rooms', 
-        component:  BlankPage,
-      },
-      {
-        path: 'facilities', 
-        component:  BlankPage,
-      },
-      {
-        path: 'policy', 
-        component:  BlankPage,
-      },
-      // ...
-    ],
   },
   {
     path: '/about',

@@ -561,10 +561,8 @@ app.post('/roomdetail',jsonParser, (req, res) => {
 
                     if (end_time.isBefore(nowThailand) && date_reservation.isBefore(nowThailand)) {
                         reservationsToDelete.push(reservation);
-                        console.log(end_time)
                     } else {
                         reservationsToKeep.push(reservation);
-                        console.log(end_time)
                     }
                 });
 
