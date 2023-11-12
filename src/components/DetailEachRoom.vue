@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
     <navbarLogin/>
     <div>
       
@@ -266,4 +266,4 @@ export default {
   margin-top:60px;
   margin-left: 10px;
 }
-</style>
+</style> -->

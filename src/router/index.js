@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+// import HomeView from '../views/HomeView.vue'
 import Profile from '../views/ProfileView.vue'
 import HomeComponent from '../components/Home.vue'
 import Register from '../components/register.vue'
@@ -7,13 +7,19 @@ import Login from '../components/Login.vue'
 import BlankPage from '../components/BlankPage.vue'
 import rooms from '../components/rooms.vue'
 import roomdetail from '../components/roomdetail.vue'
+import reservation from '../components/reservation.vue'
 
 
 const routes = [
   {
     path: '/',
     name: 'home',
-    component: HomeView
+    component: HomeComponent
+  },
+  {
+    path: '/reservation',
+    name: 'reservation',
+    component: reservation
   },
   {
     path: '/room',

@@ -135,7 +135,7 @@ app.get('/profile/:token', function (req, res) {
                     res.json({ status: 'error', message: 'no user found' })
                     return
                 }
-                let Usname = results[0].user_fname + ["   "] + results[0].user_lname
+                let Usname = results[0].user_fname + [" "] + results[0].user_lname
                 let Usemail = results[0].user_email
                 let Usphone = results[0].user_phone
                 res.json({ status: 'ok', message: 'success', usname: Usname, usemail: Usemail, usphone: Usphone })
@@ -204,7 +204,7 @@ app.put('/newPassword', jsonParser, function (req, res) {
 // NewPassword-------------------------------------------------------------------------------------------------------------------
 
 // Reservation-------------------------------------------------------------------------------------------------------------------
-app.post('/reserveroom/:roomdetail_id', jsonParser, async function (req, res) {
+app.post('/room/:roomdetail_id', jsonParser, async function (req, res) {
     try {
         const decode = jwt.verify(req.body.token, secret);
         const { username, user_id } = decode;
@@ -372,6 +372,9 @@ function updateRoomStatus(roomdetail_id, status) {
           updateRoomStatus(roomdetail_id, 0);
         } else {
           updateRoomStatus(roomdetail_id, 1);
+          console.log(reservationTime)
+          console.log('---',endTime)
+          console.log('------',nowThailand.format('YYYY-MM-DD'+'T'+'HH:mm:ss'))
         }
       });
     });
@@ -403,12 +406,14 @@ app.get('/getreservations/:token', function (req, res) {
                 }
 
                 // สร้างรายการข้อมูลการจอง
+                
                 const reservations = results.map((result) => {
                     return {
                         start_time: result.start_time,
                         end_time: result.end_time,
                         room_id: result.roomdetail_id,
-                        date_reservation: result.date_reservation
+                        date_reservation: result.date_reservation,
+                        reservation_id: result.reservation_id
                     };
                 });
 

@@ -13,4 +13,7 @@
   background-size: cover;
 
 }
+*{
+  font-family: 'serif';
+}
 </style>

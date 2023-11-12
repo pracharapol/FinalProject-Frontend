@@ -1,51 +1,60 @@
 <template>
-  <head>
-    <title>User Profile</title>
-  </head>
   <body>
-    <div>
-      <profile-card>
-        <div class="profile-card">
-          <div class="profile-header">
-            <div class="profile-avatar">
-              <img src="../assets/Hometoppic_auto_x2.jpg" alt="User Avatar" />
-            </div>
-            <h1 class="user-name">{{ user.firstName }} {{ user.lastName }}</h1>
-            <p class="user-email">{{ user.email }}</p>
+  <div>
+    <profile-card v-if="user">
+      <div class="profile-card">
+        <div class="profile-header">
+          <div class="profile-avatar">
+            <img src="../assets/Hometoppic_auto_x2.jpg" alt="User Avatar" />
           </div>
-          <p class="user-bio">{{ user.bio }}</p>
-          <p class="profile-contact">Phone: {{ user.phoneNumber }}</p>
-        </div></profile-card>
-    </div>
-  </body>
+          <h1 class="user-name">{{ user.firstName }} {{ user.lastName }}</h1>
+          <p class="user-email">{{ user.email }}</p>
+        </div>
+        <p class="user-bio">online: 24 Hour</p>
+        <p class="profile-contact">Phone: {{ user.phoneNumber }}</p>
+      </div>
+    </profile-card>
+    <div v-else>Loading...</div>
+  </div>
+</body>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
-      user: {
-        firstName: "Kong",
-        lastName: "Pracharapol",
-        email: "knog@example.com",
-        bio: "Frontend Developer",
-        phoneNumber: "123-456-7890",
-        avatar: "", // URL ของรูปภาพ
-      },
+      user: null,
     };
   },
   methods: {
-    editProfile() {
-      this.isEditing = true;
-      this.editedUser = { ...this.user };
+    fetchUserProfile(token) {
+      axios
+        .get(`http://localhost:3333/profile/${token}`)
+        .then((response) => {
+          const { status, usname, usemail, usphone } = response.data;
+          if (status === 'ok') {
+            this.user = {
+              firstName: usname.split(' ')[0],
+              lastName: usname.split(' ')[1],
+              email: usemail,
+              phoneNumber: usphone,
+            };
+          } else {
+            console.error(response.data.message);
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to fetch user profile.', error);
+        });
     },
-    saveProfile() {
-      this.user = { ...this.editedUser };
-      this.isEditing = false;
-    },
-    cancelEdit() {
-      this.isEditing = false;
-    },
+  },
+  mounted() {
+    const token = localStorage.getItem('token');
+    if (token) {
+      this.fetchUserProfile(token);
+    }
   },
 };
 </script>

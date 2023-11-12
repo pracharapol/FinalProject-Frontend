@@ -5,6 +5,7 @@
           <div class="text-form"><router-link to="/HomeComponent">Home</router-link></div>
           <div class="text-form2"><router-link to="/room">Room&nbsp;&nbsp;&nbsp;></router-link></div>
       </div>
+      
       <div class="content2">
       <h2 style="text-align: left; font-size: 30px; font-weight: bold; margin-top: 20px; color: #000000; padding-left: 5%;">Rooms List</h2>
       <div class="topnav">
@@ -126,16 +127,19 @@ export default {
       this.showAllRoom = true;
       this.showAvailableRoom = false;
       this.showBookedRoom = false;
+      this.showSearchRoom = false;
     },
     showAvailableRooms() {
       this.showAllRoom = false;
       this.showAvailableRoom = true;
       this.showBookedRoom = false;
+      this.showSearchRoom = false;
     },
     showBookedRooms() {
       this.showAllRoom = false;
       this.showAvailableRoom = false;
       this.showBookedRoom = true;
+      this.showSearchRoom = false;
     },
     showSearchRooms() {
       this.showAllRoom = false;

@@ -1,11 +1,10 @@
 <template>
   <navbarLogin/>
-  <div>
-    
-    <router-link to ="/HomeComponent"><img src="../assets/backIcon.png" alt="backIcon" style="margin-right:1520px;width: 30px;height: 30px;margin-top: 30px;"/></router-link>
+  <div style="text-align: left;">
+    <router-link to ="/HomeComponent"><img src="../assets/backIcon.png" alt="backIcon" style="width: 30px;height: 30px;margin-top: 30px;"/></router-link>
   </div>
   
-  <div style="padding-left:130px;padding-right: 120px;margin-top:-60px">
+  <div style="padding-left:100px;margin-top:-60px">
       
       <div style="display: flex; margin-top:80px ;width:88%;height: 450px;background-color: none;">
         <div >
@@ -27,13 +26,12 @@
       <div style="width: 100%;height: auto;">
         <h2 class="topicRoom">Room {{room.room_num}}</h2>
         <p class="detailTopicRoom">Comfortable for small team ({{room.room_person}} persons)</p>
-        <p class="detailTopicRoom2">Excellent</p>
-        <div class="reviewButton">
-          <p>8.5</p>
-        </div>
-        <p class="amountOfPeopleReview">150 reviews</p>
-
+        <button class="reviewButton" @click="openModal">
+          Book Now
+        </button>
+        <BookingModal v-if="showModal" @close="closeModal" />
       </div >
+      
       <div style="margin-left:-8px ;">
         <div class="underlineSquare"/>
         <div style="margin-top: -56.5px;">
@@ -71,17 +69,20 @@
   import axios from 'axios';
   import navbarLogin  from '@/components/navbarLogin.vue'
   import navbarEachRoomDetail from '@/components/navbarEachRoomDetail.vue'
+  import BookingModal from '@/components/BookingModal.vue'
 
   export default {
     name: 'RoomDetail',
     components: {
     navbarLogin,
     navbarEachRoomDetail,
+    BookingModal,
   },
     data() {
       return {
         room: {},
         rooms: [],
+        showModal: false,
       };
     },
     created() {
@@ -118,6 +119,12 @@
     },
     bookRoom() {
       this.$router.go(0)
+    },
+    openModal() {
+      this.showModal = true;
+    },
+    closeModal() {
+      this.showModal = false;
     },
   },
   mounted() {
@@ -163,7 +170,7 @@
   padding-top:-200px;
 }
 .resize-room4{
-    width: 720px;
+    width: 670px;
     height:450px;
     margin-right:100%;
     border-radius:20px;
@@ -171,31 +178,31 @@
    
 }
 .room4piccom{
-    width: 320px;
+    width: 280px;
     height:215px;
     margin-left:20px;
     border-radius:10px;
    
 }
 .room4Bar{
-    width: 320px;
+    width: 280px;
     height:215px;
     margin-left:20px;
     border-radius:10px;
 }
 .room4Toilet{
-    width: 320px;
+    width: 280px;
     height:215px;
     border-radius:10px;
     margin-top:235px;
-    margin-left:-1000px;
+    margin-left:-880px;
 }
 .room4PublicSpace{
-    width: 320px;
+    width: 280px;
     height:215px;
     border-radius:10px;
     margin-top:235px;
-    margin-left:-320px;
+    margin-left:-280px;
 }
 .topicRoom{
   
@@ -240,23 +247,29 @@
  color: rgb(0, 0, 0);
 }
 .reviewButton {
-    width: 80px;
+    width: 190px;
     height: 40px;
     background-color: rgb(149, 105, 74);
     border-radius: 20px;
-    margin-left:90%;
+    margin-left:80%;
     margin-top: -40px;
     color: white;
-    /* ถ้าจะจัดให้ text อยู่ตรงกลางbutton ต่างๆ */
     display: flex; 
     align-items: center; 
     justify-content: center; 
+    font-size: 16px;
+    color: white;
+    font-family: 'serif';
+    border: 1px solid #8E5F34;
+}
+.reviewButton:hover {
+  background-color: #ffffff;
+  color: #8E5F34;
+  border: 1px solid #8E5F34;
+  transition: 0.5s;
+  cursor: pointer;
 }
 
-.reviewButton p  {
-    font-size: 18px;
-    color: white;
-}
 .amountOfPeopleReview{
   margin-top:-20px ;
   text-align: right;
