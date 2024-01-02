@@ -6,7 +6,7 @@
     <li><router-link to="/profile">Populars</router-link></li>
     <li v-if="!isLoggedIn" class="Login-button"><router-link to="/Login">Login</router-link></li>
     <li v-if="!isLoggedIn" class="Sign-button"><router-link to="/Register">Sign-up</router-link></li>
-    <li v-if="isLoggedIn" class="dropdown"><button class="dropbtn">Dropdown 
+    <li v-if="isLoggedIn" class="dropdown"><button class="dropbtn">Menu
       <i class="fa fa-caret-down"></i>
     </button>
     <div class="dropdown-content">

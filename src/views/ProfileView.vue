@@ -1,6 +1,9 @@
 <template>
   <body>
   <div>
+    <div style="text-align: left;">
+    <router-link to ="/HomeComponent"><img src="../assets/backIcon.png" alt="backIcon" style="width: 30px;height: 30px;margin-top: 30px;"/></router-link>
+  </div>
     <profile-card v-if="user">
       <div class="profile-card">
         <div class="profile-header">
@@ -15,17 +18,29 @@
       </div>
     </profile-card>
     <div v-else>Loading...</div>
+    <button class="edit-profile" @click="openEditModal">Edit Profile</button>
+    <EditModal v-if="showEditModal" @close="closeEditModal" />
+    <button class="change-pass" @click="openChangePassModal">Change Password</button>
+    <ChangePassModal v-if="showChangePassModal" @close="closeChangePassModal" />
   </div>
 </body>
 </template>
 
 <script>
 import axios from 'axios';
+import ChangePassModal from '@/components/ChangePassModal.vue'
+import EditModal from '@/components/EditModal.vue'
 
 export default {
+  components: {
+    ChangePassModal,
+    EditModal,
+  },
   data() {
     return {
       user: null,
+      showChangePassModal: false,
+      showEditModal: false,
     };
   },
   methods: {
@@ -48,6 +63,18 @@ export default {
         .catch((error) => {
           console.error('Failed to fetch user profile.', error);
         });
+    },
+    openChangePassModal() {
+      this.showChangePassModal = true;
+    },
+    closeChangePassModal() {
+      this.showChangePassModal = false;
+    },
+    openEditModal() {
+      this.showEditModal = true;
+    },
+    closeEditModal() {
+      this.showEditModal = false;
     },
   },
   mounted() {
@@ -110,5 +137,53 @@ body {
 .profile-contact {
   font-size: 18px;
   margin: 10px 0;
+}
+
+.edit-profile {
+  background-color: #885B3B;
+  color: #fff;
+  padding: 10px 10px;
+  height: 42px;
+  border: none;
+  border-radius: 10px;
+  width: 300px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: serif;
+  margin-left: 15px;
+  margin-top: 20px;
+  font-size: 18px;
+  margin-bottom:50px ;
+}
+
+.edit-profile:hover{
+  background-color:#ffffff;
+  border: 1px solid #885B3B;
+  color: #885B3B;
+  transition: 0.5s;
+}
+
+.change-pass {
+  background-color: #885B3B;
+  color: #fff;
+  padding: 10px 10px;
+  height: 42px;
+  border: none;
+  border-radius: 10px;
+  width: 300px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: serif;
+  margin-left: 15px;
+  margin-top: 20px;
+  font-size: 18px;
+  margin-bottom:50px ;
+}
+
+.change-pass:hover{
+  background-color:#ffffff;
+  border: 1px solid #885B3B;
+  color: #885B3B;
+  transition: 0.5s;
 }
 </style>

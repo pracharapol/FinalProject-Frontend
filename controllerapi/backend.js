@@ -148,6 +148,31 @@ app.get('/profile/:token', function (req, res) {
         res.json({ status: 'error', message: err.message })
     }
 })
+
+app.put('/newProfile', jsonParser, function(req, res){
+    const decode = jwt.verify(req.body.token, secret);
+    const { username } = decode;
+    const fname = req.body.user_fname;
+    const lname = req.body.user_lname;
+    const phone = req.body.user_phone;
+    connection.query(
+        'UPDATE user_insystem SET user_fname=?, user_lname=?, user_phone=? WHERE user_username=?', [fname, lname, phone, username],
+        function (err, results) {
+            if (err) {
+                res.json({ status: 'error', message: err });
+                return;
+            }
+            if (results.affectedRows === 0) {
+                res.json({ status: 'not found user' });
+                return;
+            } else {
+                res.json({ status: 'ok', message: 'Profile edited successfully' });
+                return;
+            }
+        }
+    );
+});
+
 // Profile-------------------------------------------------------------------------------------------------------------------
 
 // NewPassword-------------------------------------------------------------------------------------------------------------------
@@ -182,7 +207,7 @@ app.put('/newPassword', jsonParser, function (req, res) {
                                 }
                                 else {
 
-                                    res.send(results)
+                                    res.json({ status: 'ok', message: 'Password updated successfully' });
                                     return
                                 }
                             }
@@ -372,9 +397,9 @@ function updateRoomStatus(roomdetail_id, status) {
           updateRoomStatus(roomdetail_id, 0);
         } else {
           updateRoomStatus(roomdetail_id, 1);
-          console.log(reservationTime)
-          console.log('---',endTime)
-          console.log('------',nowThailand.format('YYYY-MM-DD'+'T'+'HH:mm:ss'))
+        //   console.log(reservationTime)
+        //   console.log('---',endTime)
+        //   console.log('------',nowThailand.format('YYYY-MM-DD'+'T'+'HH:mm:ss'))
         }
       });
     });
@@ -408,17 +433,22 @@ app.get('/getreservations/:token', function (req, res) {
                 // สร้างรายการข้อมูลการจอง
                 
                 const reservations = results.map((result) => {
+                    const date_reservation = moment(result.date_reservation); // แปลงเป็น Moment object
+                    date_reservation.add(7, 'hours');
                     return {
                         start_time: result.start_time,
                         end_time: result.end_time,
                         room_id: result.roomdetail_id,
-                        date_reservation: result.date_reservation,
+                        date_reservation: date_reservation,
                         reservation_id: result.reservation_id
+                        
                     };
+                    
                 });
-
+                
                 res.json({ status: 'ok', message: 'Success', reservations: reservations });
                 return;
+                
             }
         );
     } catch (err) {
@@ -427,7 +457,7 @@ app.get('/getreservations/:token', function (req, res) {
 });
 // GetReservation-------------------------------------------------------------------------------------------------------------------
 
-//roomdetail---------------------------------------------------------------------------------------------------------------
+//adminroomdetail---------------------------------------------------------------------------------------------------------------
 app.post('/roomdetail',jsonParser, (req, res) => {
     const roomNum = req.body.room_num;
     const statusRoom = req.body.status_room;
