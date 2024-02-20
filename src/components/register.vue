@@ -10,12 +10,12 @@
         <input class="Rinpuserpass" type="text" id="username" style="text-align: center;" v-model="username" required>
       </div>
       <div v-if="showRform" class="Rform-group">
-        <label for="password" style="font-size: 20px;">Password</label>
-        <input class="Rinpuserpass" type="password" id="password" style="text-align: center;" v-model="password" required>
+        <label for="email" style="font-size: 20px;">Email</label>
+        <input class="Rinpuserpass" type="text" id="email" style="text-align: center;" v-model="email" required>
       </div>
       <div v-if="showRform" class="Rform-group">
-        <label for="confirmpassword" style="font-size: 20px;">ConfirmPassword</label>
-        <input class="Rinpuserpass" type="password" id="confirmpassword" style="text-align: center;" v-model="confirmpassword" required>
+        <label for="password" style="font-size: 20px;">Password</label>
+        <input class="Rinpuserpass" type="password" id="password" style="text-align: center;" v-model="password" required>
       </div>
       
       <button v-if="showRform" type="submit">Next</button>
@@ -34,7 +34,7 @@
       </div>
       <div v-if="!showRform && currentRoute === '/Register/id'" class="Rform-group">
         <label for="Phone" style="font-size: 20px;">Phone</label>
-        <input class="Rinpuserpass" type="text" id="Phone" style="text-align: center;" v-model="phoneNumber" required>
+        <input class="Rinpuserpass" type="text" id="Phone" style="text-align: center;" v-model="Phone" required>
       </div>
       <button v-if="!showRform && currentRoute === '/Register/id'" type="submit">Next</button>
     </form>
@@ -51,6 +51,7 @@
   </template>
   
   <script>
+  import axios from 'axios';
   export default {
     name: 'RegisterForm', // ระบุชื่อของคอมโพเนนต์เป็น "LoginForm"
     data() {
@@ -58,35 +59,60 @@
         currentRoute: '',
         showRform: true,
         username: '',
+        email:'',
         password: '',
-        confirmpassword: '',
         Firstname: '',
         Lastname: '',
-        Phone: [0],
+        Phone: '',
       };
     },
     methods: {
         Register() {
-          if (this.username != '' && this.password != '' && this.confirmpassword === this.password) {
+          if (this.username != '' && this.password != '') {
         this.$router.push('/Register/id'); 
-        console.log(this.username);
-      }
-       else {
-        alert('Login failed. Please check your credentials.');
-      }
-      },
-      Registername() {
-          if (this.Firstname != '' && this.Lastname!= '' && this.Phone != '') {
-        this.$router.push('/Register/photo'); 
       }
        else {
         alert('register failed. Please check your credentials.');
-        console.log(this.Firstname,this.Lastname,this.Phone);
       }
       },
+      Registername() {
+        if (this.Firstname != '' && this.Lastname!= '' && this.Phone != '') {
+          this.$router.push('/Register/photo');
+      }
+       else {
+        alert('register failed. Please check your credentials.');
+      }},
+      handleImageUpload(event) {
+  const file = event.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    this.imageBase64 = e.target.result; // เก็บข้อมูลรูปภาพในรูปแบบ base64
+  };
+
+  reader.readAsDataURL(file);
+},
       Registerphoto() {
-          alert(this.username,this.Firstname,this.Lastname, this.Phone);
-          console.log(this.username,this.Firstname,this.Lastname, this.Phone);
+      axios
+        .post('http://localhost:3333/register', {
+        user_username: this.username,
+        user_email: this.email,
+        user_password: this.password,
+        user_fname: this.Firstname,
+        user_lname: this.Lastname,
+        user_phone: this.Phone,
+        user_faceimagefile: this.imageBase64,
+    }).then((response) => {
+          const data = response.data;
+          if (data.status === 'ok') {
+            window.location = '/Login'
+          } else {
+            const errorMessage = data.message;
+            alert(errorMessage)
+          }
+    }).catch(error => {
+        console.error(error);
+    });
       }
     },
     watch: {

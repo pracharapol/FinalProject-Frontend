@@ -1,14 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
-// import HomeView from '../views/HomeView.vue'
-import Profile from '../views/ProfileView.vue'
 import HomeComponent from '../components/Home.vue'
+import Profile from '../views/ProfileView.vue'
 import Register from '../components/register.vue'
 import Login from '../components/Login.vue'
 import BlankPage from '../components/BlankPage.vue'
 import rooms from '../components/rooms.vue'
 import roomdetail from '../components/roomdetail.vue'
 import reservation from '../components/reservation.vue'
-
 
 const routes = [
   {
@@ -34,10 +32,6 @@ const routes = [
       {
         path: '', 
         component: BlankPage, 
-      },
-      {
-        path: 'rooms', 
-        component:  BlankPage,
       },
       {
         path: 'facilities', 

@@ -52,8 +52,8 @@ app.post('/register', jsonParser, function (req, res, next) {
                 else {
                     bcrypt.hash(req.body.user_password, saltRounds, function (err, hash) {
                         connection.execute(
-                            'INSERT INTO user_insystem (user_email, user_password, user_fname, user_lname, user_username, user_phone) VALUES (?, ?, ?, ?, ?, ?)',
-                            [req.body.user_email, hash, req.body.user_fname, req.body.user_lname, req.body.user_username, req.body.user_phone],
+                            'INSERT INTO user_insystem (user_username, user_email, user_password, user_fname, user_lname, user_phone, user_faceimagefile) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                            [req.body.user_username, req.body.user_email, hash, req.body.user_fname, req.body.user_lname, req.body.user_phone, req.body.user_faceimagefile],
                             function (err, results, fields) {
                                 if (err) {
                                     return res
@@ -138,7 +138,8 @@ app.get('/profile/:token', function (req, res) {
                 let Usname = results[0].user_fname + [" "] + results[0].user_lname
                 let Usemail = results[0].user_email
                 let Usphone = results[0].user_phone
-                res.json({ status: 'ok', message: 'success', usname: Usname, usemail: Usemail, usphone: Usphone })
+                let Usimg = results[0].user_faceimagefile
+                res.json({ status: 'ok', message: 'success', usname: Usname, usemail: Usemail, usphone: Usphone, usimg:Usimg })
                 return
             }
 
@@ -397,9 +398,9 @@ function updateRoomStatus(roomdetail_id, status) {
           updateRoomStatus(roomdetail_id, 0);
         } else {
           updateRoomStatus(roomdetail_id, 1);
-        //   console.log(reservationTime)
-        //   console.log('---',endTime)
-        //   console.log('------',nowThailand.format('YYYY-MM-DD'+'T'+'HH:mm:ss'))
+          console.log('reservationTime',reservationTime)
+          console.log('endTime',endTime)
+          console.log('nowThailand',nowThailand.format('YYYY-MM-DD'+'T'+'HH:mm:ss'))
         }
       });
     });

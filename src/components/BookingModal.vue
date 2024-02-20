@@ -1,31 +1,49 @@
 <template>
-    <div class="modal">
-      <div class="modal-content">
-        <h2>Booking Confirmation</h2>
-        <p>Are you sure you want to book this room?</p>
-        <div class="reserve-container">
-          <h1 style="text-align: center; font-size: 24px; margin-bottom: 25px; margin-top: 40px; margin-left:20px">SELECT</h1>
-          <form @submit.prevent="confirmBooking">
-            <div class="form-reserve">
-              <label for="date" style="font-size: 20px;">Date</label>
-              <input class="date" type="date" id="date" style="text-align: center;" v-model="dateReserve" required>
-            </div>
-            <div class="form-reserve">
-              <label for="starttime" style="font-size: 20px; ">Start-Time</label>
-              <input class="date2" type="time" id="starttime" style="text-align: center;" v-model="startTime" required>
-            </div>
-            <div class="form-reserve">
-              <label for="endtime" style="font-size: 20px; margin-right: 5px;">End-Time</label>
-              <input class="date2" type="time" id="endtime" style="text-align: center;" v-model="endTime" required>
-            </div>
-            <button  @click="closeModal" class="buttonBook">Cancel</button>
-            <button type="submit" class="buttonBook">Confirm</button>
-        
-          </form>
-        </div>
+  <div class="modal">
+    <div class="modal-content">
+      <h2>Booking Confirmation</h2>
+      <p>Are you sure you want to book this room?</p>
+      <div class="reserve-container">
+        <h1 style="text-align: center; font-size: 24px; margin-bottom: 25px; margin-top: 40px; margin-left:20px">SELECT</h1>
+        <form @submit.prevent="confirmBooking">
+          <div class="form-reserve">
+            <label for="date" style="font-size: 20px;">Date</label>
+            <input class="date" type="date" id="date" style="text-align: center;" v-model="dateReserve" required>
+          </div>
+          <div class="form-reserve">
+            <label for="starttime" style="font-size: 20px;">Start-Time</label>
+            <select class="date2" v-model="startTime" required>
+              <option class="opttime" value="">Select</option>
+              <template v-for="hour in Array.from({ length: 24 }, (_, index) => index)" :key="hour">
+                <template v-for="minute in [0, 30]" :key="minute">
+                  <option :value="`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`" >
+                    {{ String(hour).padStart(2, '0') }}:{{ String(minute).padStart(2, '0') }}
+                  </option>
+                </template>
+              </template>
+            </select>
+          </div>
+          <div class="form-reserve">
+            <label for="endtime" style="font-size: 20px; margin-right: 5px;">End-Time</label>
+            <select class="date2" v-model="endTime" required>
+              <option class="opttime" value="">Select</option>
+              <template v-for="hour in Array.from({ length: 24 }, (_, index) => index)" :key="hour">
+                <template v-for="minute in [0, 30]" :key="minute">
+                  <option :value="`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`" >
+                    {{ String(hour).padStart(2, '0') }}:{{ String(minute).padStart(2, '0') }}
+                  </option>
+                </template>
+              </template>
+            </select>
+          </div>
+          <button @click="closeModal" class="buttonBook">Cancel</button>
+          <button type="submit" class="buttonBook">Confirm</button>
+        </form>
       </div>
     </div>
-  </template>
+  </div>
+</template>
+
   
   <script>
     import axios from 'axios';
@@ -57,7 +75,6 @@
       try {
         const response = await this.reserveRoom();
         if (response.status === 'ok') {
-          // Handle successful reservation, e.g., show a success message
           console.log('Room reserved successfully');
           this.closeModal();
           window.location = '/reservation';
@@ -169,8 +186,8 @@
 .date2 {
   font-family: 'serif';
   font-size: 20px;
-  width: 150px;
-  height: 30px;
+  width: 180px;
+  height: 35px;
   padding: 5px 0px;
   border: 2px solid rgb(136, 91, 59);
   border-radius: 10px;
@@ -180,7 +197,9 @@
   color: rgb(0, 0, 0); /* ตั้งค่าสีข้อความเป็นสีขาว */
   margin-left: 17px;
   margin-bottom: 30px;
+  text-align: center;
 }
+
 .buttonBook{
     border-radius: 10px; 
   background-color: #8E5F34;

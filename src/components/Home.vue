@@ -90,6 +90,7 @@
       <router-link :to="'/room/' + room.roomdetail_id">See Detail</router-link>
     </li>
     </div>
+    
   </div>
 </div>
 

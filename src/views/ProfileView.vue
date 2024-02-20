@@ -1,14 +1,13 @@
 <template>
-  <body>
   <div>
     <div style="text-align: left;">
-    <router-link to ="/HomeComponent"><img src="../assets/backIcon.png" alt="backIcon" style="width: 30px;height: 30px;margin-top: 30px;"/></router-link>
-  </div>
+      <router-link to="/HomeComponent"><img src="../assets/backIcon.png" alt="backIcon" style="width: 30px;height: 30px;margin-top: 30px;"/></router-link>
+    </div>
     <profile-card v-if="user">
       <div class="profile-card">
         <div class="profile-header">
           <div class="profile-avatar">
-            <img src="../assets/Hometoppic_auto_x2.jpg" alt="User Avatar" />
+            <img :src=user.usimg alt="User Avatar" />
           </div>
           <h1 class="user-name">{{ user.firstName }} {{ user.lastName }}</h1>
           <p class="user-email">{{ user.email }}</p>
@@ -23,7 +22,6 @@
     <button class="change-pass" @click="openChangePassModal">Change Password</button>
     <ChangePassModal v-if="showChangePassModal" @close="closeChangePassModal" />
   </div>
-</body>
 </template>
 
 <script>
@@ -48,13 +46,14 @@ export default {
       axios
         .get(`http://localhost:3333/profile/${token}`)
         .then((response) => {
-          const { status, usname, usemail, usphone } = response.data;
+          const { status, usname, usemail, usphone, usimg } = response.data;
           if (status === 'ok') {
             this.user = {
               firstName: usname.split(' ')[0],
               lastName: usname.split(' ')[1],
               email: usemail,
               phoneNumber: usphone,
+              usimg: usimg,
             };
           } else {
             console.error(response.data.message);
