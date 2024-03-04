@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/require-v-for-key -->
 <template>
   <div class="modal">
     <div class="modal-content">
@@ -36,6 +37,13 @@
               </template>
             </select>
           </div>
+          <div class="form-reserve">
+            <label for="attendee" style="font-size: 20px; margin-right: 20px;">attendee</label>
+              <select class="date2" v-model="selectedAttendee" required>
+                <option value="">Select</option>
+                <option v-for="attendee in getattendee" :value="attendee">{{ attendee }}</option>
+              </select>
+          </div>
           <button @click="closeModal" class="buttonBook">Cancel</button>
           <button type="submit" class="buttonBook">Confirm</button>
         </form>
@@ -54,6 +62,8 @@
       startTime: '',
       endTime: '',
       roomDetailId: null,
+      getattendee: [],
+      selectedAttendee: '',
     };
   },
   created() {
@@ -69,8 +79,19 @@
       .catch((error) => {
         console.error('Failed to retrieve room details.', error);
       });
+      this.fetchattendee();
   },
   methods: {
+    fetchattendee() {
+      axios
+        .get('http://localhost:3333/attendee')
+        .then((response) => {
+          this.getattendee = response.data.allmail;
+        })
+        .catch((error) => {
+          console.error('Failed to find attendee.', error);
+        });
+    },
     async confirmBooking() {
       try {
         const response = await this.reserveRoom();

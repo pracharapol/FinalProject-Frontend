@@ -47,7 +47,13 @@ const routes = [
   {
     path: '/Login',
     name: 'Login',
-    component: Login
+    component: Login,
+    beforeEnter: (to, from, next) => {
+      if (localStorage.getItem('token')) {
+        localStorage.removeItem('token');
+      }
+      next();
+    }
   },
   {
     path: '/Register',

@@ -1,7 +1,6 @@
 <template>
   <nav id="nav">
-    <li><router-link to="/" style="background-color: rgb(255, 255, 255); font-size: 20px; font-weight: bold;">Kongtel</router-link></li>
-    <li><router-link to="/about">Properties</router-link></li>
+    <li><router-link to="/" style="background-color: rgb(255, 255, 255); font-size: 20px; font-weight: bold;">ABC Rooms</router-link></li>
     <li><router-link to="/profile">Reviews</router-link></li>
     <li><router-link to="/profile">Populars</router-link></li>
     <li v-if="!isLoggedIn" class="Login-button"><router-link to="/Login">Login</router-link></li>

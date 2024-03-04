@@ -90,7 +90,7 @@ app.post('/login', jsonParser, function (req, res, next) {
             const userId = users[0].user_id;
             bcrypt.compare(req.body.user_password, users[0].user_password, function (err, isLogin) {
                 if (isLogin) {
-                    var token = jwt.sign({ user_id: userId, username: users[0].user_username }, secret, { expiresIn: '12h' });
+                    var token = jwt.sign({ user_id: userId, username: users[0].user_username }, secret, { expiresIn: '10h' });
                     res.json({ status: 'ok', message: 'login success', token })
 
                 }
@@ -246,6 +246,11 @@ app.post('/room/:roomdetail_id', jsonParser, async function (req, res) {
             // ดึงข้อมูล roomDetail โดยใช้ Promise
             const roomDetailData = await getRoomDetail(roomDetail);
             const roomIsAvailable = await isRoomAvailable(roomDetail, dateReserve, startTime, endTime);
+
+            if (startTime >= endTime) {
+                res.json({ status: 'error', message: 'Start time cannot be greater than or equal to end time' });
+                return;
+            }
             if(roomIsAvailable) {
             if (roomDetailData) {
                 // เพิ่มการจองโดยใช้ Promise
@@ -299,21 +304,35 @@ function addReservation(startTime, endTime, user_id, dateReserve, createReserve,
         );
     });
 }
-// ฟังก์ชันสำหรับตรวจสอบว่าห้องว่างหรือไม่
+
 async function isRoomAvailable(roomDetail, dateReserve, startTime, endTime) {
-    // ดึงข้อมูลการจองสำหรับห้องและช่วงเวลาที่กำหนด
-    const reservations = await getReservationsForRoomAndDate(roomDetail, dateReserve, startTime, endTime);
-    
-    // ถ้าไม่มีการจองในช่วงเวลาที่กำหนด ห้องว่าง
-    return reservations.length === 0;
+    const reservations = await getReservationsForRoomAndDate(roomDetail, dateReserve);
+    if (reservations.length > 0) {
+        const overlappingReservations = reservations.filter(reservation => {
+            return (
+                (reservation.start_time >= startTime && reservation.start_time < endTime) ||
+                (reservation.end_time > startTime && reservation.end_time <= endTime) ||
+                (reservation.start_time < startTime && reservation.end_time > endTime) ||
+                (startTime >= reservation.start_time && endTime <= reservation.end_time)
+            );
+        });
+
+        if (overlappingReservations.length > 0) {
+            return false;
+        } else {
+            return true;
+        }
+    } else {
+        return true;
+    }
 }
 
 // ฟังก์ชันสำหรับดึงข้อมูลการจองสำหรับห้องและวันที่ที่กำหนด
-function getReservationsForRoomAndDate(roomDetail, dateReserve, startTime, endTime) {
+function getReservationsForRoomAndDate(roomDetail, dateReserve) {
     return new Promise((resolve, reject) => {
         connection.execute(
-            'SELECT * FROM reservation WHERE roomdetail_id=? AND date_reservation=? AND ((start_time <= ? AND end_time >= ?) OR (start_time <= ? AND end_time >= ?))',
-            [roomDetail, dateReserve, startTime, startTime, endTime, endTime],
+            'SELECT * FROM reservation WHERE roomdetail_id=? AND date_reservation=?',
+            [roomDetail, dateReserve],
             (err, results, fields) => {
                 if (err) {
                     reject(err);
@@ -398,9 +417,9 @@ function updateRoomStatus(roomdetail_id, status) {
           updateRoomStatus(roomdetail_id, 0);
         } else {
           updateRoomStatus(roomdetail_id, 1);
-          console.log('reservationTime',reservationTime)
-          console.log('endTime',endTime)
-          console.log('nowThailand',nowThailand.format('YYYY-MM-DD'+'T'+'HH:mm:ss'))
+        //   console.log('reservationTime',reservationTime)
+        //   console.log('endTime',endTime)
+        //   console.log('nowThailand',nowThailand.format('YYYY-MM-DD'+'T'+'HH:mm:ss'))
         }
       });
     });
@@ -638,6 +657,31 @@ app.post('/roomdetail',jsonParser, (req, res) => {
     }
 });
 //Get time reservation---------------------------------------------------------------------------------------------------------------
+
+//Get attendee---------------------------------------------------------------------------------------------------------------
+app.get('/attendee', function (req, res) {
+    try {
+        connection.execute(
+            'SELECT user_email FROM user_insystem',
+            function (err, results) {
+                if (err) {
+                    return res.json({ status: 'error', message: err });
+                }
+                if (results.length == 0) {
+                    return res.json({ status: 'error', message: 'no user found' });
+                }
+                // ต้องดึงออกจาก results ในรูปแบบของ array
+                let allMails = results.map(result => result.user_email);
+                res.json({ status: 'ok', message: 'success', allmail: allMails });
+                return;
+            }
+        );
+    } catch (err) {
+        return res.json({ status: 'error', message: err.message });
+    }
+});
+
+//Get attendee---------------------------------------------------------------------------------------------------------------
 
 //setInterval------------------------------------------------------------------------------------------------------------------------
 const updateInterval = 5 * 60 * 1000; // 5 นาทีในมิลลิวินาที

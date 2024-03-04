@@ -1,7 +1,7 @@
 <template>
     <div class="bodyroom">
       <div class="content1">
-          <h1 style="text-align: center; font-size: 40px; font-weight: bold; margin-top: 20px; color: #000000;">KongTel</h1>
+          <h1 style="text-align: center; font-size: 40px; font-weight: bold; margin-top: 20px; color: #000000;">ABC Rooms</h1>
           <div class="text-form"><router-link to="/HomeComponent">Home</router-link></div>
           <div class="text-form2"><router-link to="/room">Room&nbsp;&nbsp;&nbsp;></router-link></div>
       </div>

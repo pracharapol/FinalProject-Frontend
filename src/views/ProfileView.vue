@@ -16,10 +16,10 @@
         <p class="profile-contact">Phone: {{ user.phoneNumber }}</p>
       </div>
     </profile-card>
-    <div v-else>Loading...</div>
-    <button class="edit-profile" @click="openEditModal">Edit Profile</button>
+    <div class="loadingProfile" v-else>Loading...</div>
+    <button v-if="user" class="edit-profile" @click="openEditModal">Edit Profile</button>
     <EditModal v-if="showEditModal" @close="closeEditModal" />
-    <button class="change-pass" @click="openChangePassModal">Change Password</button>
+    <button v-if="user" class="change-pass" @click="openChangePassModal">Change Password</button>
     <ChangePassModal v-if="showChangePassModal" @close="closeChangePassModal" />
   </div>
 </template>
@@ -184,5 +184,9 @@ body {
   border: 1px solid #885B3B;
   color: #885B3B;
   transition: 0.5s;
+}
+.loadingProfile{
+  text-align: center;
+  
 }
 </style>
