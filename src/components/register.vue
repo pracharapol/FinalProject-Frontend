@@ -52,6 +52,7 @@
   
   <script>
   import axios from 'axios';
+  import URL from '@/components/url.js'
   export default {
     name: 'RegisterForm', // ระบุชื่อของคอมโพเนนต์เป็น "LoginForm"
     data() {
@@ -64,6 +65,8 @@
         Firstname: '',
         Lastname: '',
         Phone: '',
+        imageBase64: '',
+        userishost: 1,
       };
     },
     methods: {
@@ -92,28 +95,32 @@
 
   reader.readAsDataURL(file);
 },
-      Registerphoto() {
-      axios
-        .post('http://localhost:3333/register', {
-        user_username: this.username,
+
+Registerphoto() {
+  
+  axios
+    .post(URL+'/register', {
+      user_username: this.username,
         user_email: this.email,
         user_password: this.password,
         user_fname: this.Firstname,
         user_lname: this.Lastname,
         user_phone: this.Phone,
         user_faceimagefile: this.imageBase64,
-    }).then((response) => {
-          const data = response.data;
-          if (data.status === 'ok') {
-            window.location = '/Login'
-          } else {
-            const errorMessage = data.message;
-            alert(errorMessage)
-          }
-    }).catch(error => {
-        console.error(error);
-    });
-      }
+        user_ishost: this.userishost,
+  }).then((response) => {
+    const data = response.data;
+    if (data.status === 'ok') {
+      window.location = '/Login'
+    } else {
+      const errorMessage = data.message;
+      alert(errorMessage)
+    }
+  }).catch(error => {
+    console.error(error);
+  });
+}
+
     },
     watch: {
         '$route'(to) {

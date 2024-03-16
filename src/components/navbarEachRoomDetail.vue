@@ -4,7 +4,7 @@
       <router-link :to="'/room/' + room.roomdetail_id">Overviews</router-link>
     </li>
     <li>
-      <router-link :to="'/room/' + room.roomdetail_id + '/rooms'">Rooms</router-link>
+      <router-link :to="'/room'">Rooms</router-link>
     </li>
     <li>
       <router-link :to="'/room/' + room.roomdetail_id + '/facilities'">Facilities</router-link>
@@ -14,6 +14,7 @@
     </li>
     <div>
       <div v-if="showOverView" class="detailOverview">
+        
         <h1 style="text-align: left; margin-left: 50px; margin-top: 80px">
           Properties Overview
         </h1>
@@ -69,6 +70,7 @@
 </template>
 <script>
 import axios from 'axios';
+import URL from '@/components/url.js'
 export default {
   name: "navDetail",
   props: {
@@ -79,6 +81,7 @@ export default {
       showOverView: true,
       room: {},
       rooms: [],
+      
     };
   },
   created() {
@@ -86,13 +89,15 @@ export default {
       
       // เรียก API เพื่อดึงข้อมูลห้อง
       axios
-        .get(`http://localhost:3333/room/${roomDetailId}`)
+        .get(URL+`/room/${roomDetailId}`)
         .then((response) => {
           this.room = response.data.room;
         })
         .catch((error) => {
           console.error('Failed to retrieve room details.', error);
         });this.fetchRoomData();
+
+        
     },
     watch: {
   $route(to) {
@@ -111,7 +116,7 @@ export default {
 methods: {
   fetchRoomData() {
       axios
-        .get('http://localhost:3333/room')
+        .get(URL+'/room')
         .then((response) => {
           this.rooms = response.data.rooms;
           console.log(response.data.rooms);

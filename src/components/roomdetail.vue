@@ -31,6 +31,11 @@
         </button>
         <BookingModal v-if="showModal" @close="closeModal" />
       </div >
+      <p class="allbook">All Booking Today</p>
+      <div v-for="reservation in reservations" :key="reservation.id" class="allbook2">
+          <p>{{ reservation.start_time }} - {{ reservation.end_time }}</p>
+          
+        </div>
       
       <div style="margin-left:-8px ;">
         <div class="underlineSquare"/>
@@ -60,6 +65,7 @@
             </div>
         </div>
       </div>
+      
     </div>
 </div>
 
@@ -70,6 +76,7 @@
   import navbarLogin  from '@/components/navbarLogin.vue'
   import navbarEachRoomDetail from '@/components/navbarEachRoomDetail.vue'
   import BookingModal from '@/components/BookingModal.vue'
+  import URL from '@/components/url.js'
 
   export default {
     name: 'RoomDetail',
@@ -83,6 +90,7 @@
         room: {},
         rooms: [],
         showModal: false,
+        reservations: [],
       };
     },
     created() {
@@ -90,7 +98,7 @@
       
       // เรียก API เพื่อดึงข้อมูลห้อง
       axios
-        .get(`http://localhost:3333/room/${roomDetailId}`)
+        .get(URL+`/room/${roomDetailId}`)
         .then((response) => {
           this.room = response.data.room;
         })
@@ -98,6 +106,8 @@
           console.error('Failed to retrieve room details.', error);
         });
         this.fetchRoomData();
+        this.fetchtime();
+      
     },
     methods: {
     statusStyle(status) {
@@ -106,9 +116,20 @@
       }
       return {};
     },
+    fetchtime() {
+      const roomDetailId = this.$route.params.roomdetail_id;
+      axios
+      .get(URL+`/alltime/${roomDetailId}`)
+      .then((response) => {
+        this.reservations = response.data;
+      })
+      .catch((error) => {
+        console.error('Failed to retrieve room reservations.', error);
+      });
+    },
     fetchRoomData() {
       axios
-        .get('http://localhost:3333/room')
+        .get(URL+'/room')
         .then((response) => {
           this.rooms = response.data.rooms;
           console.log(response.data.rooms);
@@ -283,5 +304,17 @@
   background-color: rgb(126, 123, 123) ;
   margin-top:60px;
   margin-left: 10px;
+}
+.allbook{
+  color: rgb(0, 0, 0) ;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+.allbook2{
+  color: rgb(126, 123, 123) ;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
 }
 </style>

@@ -11,17 +11,17 @@ const secret = "visiblepassword"
 const moment = require('moment-timezone');
 const thailandTimezone = 'Asia/Bangkok'; // โซนเวลาของประเทศไทย
 const nowThailand = moment().tz(thailandTimezone);
-
 app.use(cors())
-
+app.use(bodyParser.json());
 
 const mysql = require('mysql2');
 const req = require('express/lib/request');
-// const { timeout } = require('nodemon/lib/config')
+
 const connection = mysql.createConnection({
-    host: 'localhost',
+    host: 'localhost',//192.168.186.71
     user: 'root',
-    database: 'mydb'
+    // password:'kong',
+    database: 'mydb'//projectfinaldb
 });
 // checkEmailError-----------------------------------------------------------------------------------------------------------
 const checkEmailError = (req, res, results) => {
@@ -52,8 +52,8 @@ app.post('/register', jsonParser, function (req, res, next) {
                 else {
                     bcrypt.hash(req.body.user_password, saltRounds, function (err, hash) {
                         connection.execute(
-                            'INSERT INTO user_insystem (user_username, user_email, user_password, user_fname, user_lname, user_phone, user_faceimagefile) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                            [req.body.user_username, req.body.user_email, hash, req.body.user_fname, req.body.user_lname, req.body.user_phone, req.body.user_faceimagefile],
+                            'INSERT INTO user_insystem (user_username, user_email, user_password, user_fname, user_lname, user_phone, user_faceimagefile, user_ishost) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                            [req.body.user_username, req.body.user_email, hash, req.body.user_fname, req.body.user_lname, req.body.user_phone, req.body.user_faceimagefile, req.body.user_ishost],
                             function (err, results, fields) {
                                 if (err) {
                                     return res
@@ -242,7 +242,7 @@ app.post('/room/:roomdetail_id', jsonParser, async function (req, res) {
             const dateReserve = req.body.date_reservation;
             const createReserve = dateReserve;
             const updateReserve = req.body.update_reservlog;
-            
+            const attendeeEmail = req.body.attendee_email;
             // ดึงข้อมูล roomDetail โดยใช้ Promise
             const roomDetailData = await getRoomDetail(roomDetail);
             const roomIsAvailable = await isRoomAvailable(roomDetail, dateReserve, startTime, endTime);
@@ -254,7 +254,7 @@ app.post('/room/:roomdetail_id', jsonParser, async function (req, res) {
             if(roomIsAvailable) {
             if (roomDetailData) {
                 // เพิ่มการจองโดยใช้ Promise
-                await addReservation(startTime, endTime, user_id, dateReserve, createReserve, updateReserve, roomDetail);
+                await addReservation(startTime, endTime, user_id, dateReserve, createReserve, updateReserve, roomDetail, attendeeEmail);
                 
                 res.json({ status: 'ok', message: 'Room reserved successfully' });
             } else {
@@ -289,11 +289,11 @@ function getRoomDetail(roomDetail) {
     });
 }
 // ฟังก์ชันสำหรับเพิ่มการจองแบบ asynchronous
-function addReservation(startTime, endTime, user_id, dateReserve, createReserve, updateReserve, roomDetail) {
+function addReservation(startTime, endTime, user_id, dateReserve, createReserve, updateReserve, roomDetail, attendeeEmail) {
     return new Promise((resolve, reject) => {
         connection.execute(
-            'INSERT INTO reservation (start_time, end_time, user_id, date_reservation, create_reservlog, update_reservlog, roomdetail_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [startTime, endTime, user_id, dateReserve, createReserve, updateReserve, roomDetail],
+            'INSERT INTO reservation (start_time, end_time, user_id, date_reservation, create_reservlog, update_reservlog, roomdetail_id, attendee_email) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [startTime, endTime, user_id, dateReserve, createReserve, updateReserve, roomDetail, attendeeEmail],
             (err, results, fields) => {
                 if (err) {
                     reject(err);
@@ -310,8 +310,8 @@ async function isRoomAvailable(roomDetail, dateReserve, startTime, endTime) {
     if (reservations.length > 0) {
         const overlappingReservations = reservations.filter(reservation => {
             return (
-                (reservation.start_time >= startTime && reservation.start_time < endTime) ||
-                (reservation.end_time > startTime && reservation.end_time <= endTime) ||
+                (reservation.start_time >= startTime && reservation.start_time <= endTime) ||
+                (reservation.end_time >= startTime && reservation.end_time <= endTime) ||
                 (reservation.start_time < startTime && reservation.end_time > endTime) ||
                 (startTime >= reservation.start_time && endTime <= reservation.end_time)
             );
@@ -343,6 +343,28 @@ function getReservationsForRoomAndDate(roomDetail, dateReserve) {
         );
     });
 }
+
+app.get('/alltime/:room_id', async function (req, res) {
+    const roomDetailId = req.params.room_id;
+    const now = nowThailand.format('YYYY-MM-DD');
+    
+    if (roomDetailId) {
+        connection.execute(
+            'SELECT start_time, end_time FROM reservation WHERE roomdetail_id=? AND date_reservation=?',
+            [roomDetailId, now],
+            (err, results, fields) => {
+                if (err) {
+                    res.status(500).json({ status: 'error', message: 'Internal server error' });
+                } else {
+                    res.json(results);
+                }
+            }
+        );
+    }
+});
+
+
+
 // Reservation-------------------------------------------------------------------------------------------------------------------
 
 // Get Room URL-------------------------------------------------------------------------------------------------------------------
@@ -399,36 +421,42 @@ function updateRoomStatus(roomdetail_id, status) {
     });
   }
   function compareAndUpdateRoomStatus() {
+    const nowThailand = moment().tz('Asia/Bangkok'); // เวลาปัจจุบันในเขตเวลาไทย
     connection.query('SELECT roomdetail_id, start_time, end_time, date_reservation FROM reservation', (err, results) => {
       if (err) {
         console.error('Failed to fetch reservation data', err);
         return;
       }
-      
+  
+      let checkedRooms = new Set(); // เก็บรายการห้องที่เช็คแล้ว
+  
       results.forEach((result) => {
         const { roomdetail_id, start_time, end_time, date_reservation } = result;
         const startTime = moment(start_time, 'HH:mm:ss').format('HH:mm:ss');
         const datereservationTime = moment(date_reservation, 'YYYY-MM-DD').format('YYYY-MM-DD');
-        const reservationTime = moment(datereservationTime + 'T' + startTime).format('YYYY-MM-DD'+'T'+'HH:mm:ss');
+        const reservationTime = moment(datereservationTime + 'T' + startTime);
         const endTime1 = moment(end_time, 'HH:mm:ss').format('HH:mm:ss');
-        const endTime = moment(datereservationTime + 'T' + endTime1).format('YYYY-MM-DD'+'T'+'HH:mm:ss');
+        const endTime = moment(datereservationTime + 'T' + endTime1);
   
-        if (nowThailand.format('YYYY-MM-DD'+'T'+'HH:mm:ss') >= reservationTime && nowThailand.format('YYYY-MM-DD'+'T'+'HH:mm:ss') <= endTime) {
+        if (checkedRooms.has(roomdetail_id)) return; // ถ้าห้องนี้เช็คแล้ว ไม่ต้องทำอะไรเพิ่มเติม
+  
+        if (nowThailand.isBetween(reservationTime, endTime)) {
           updateRoomStatus(roomdetail_id, 0);
+          checkedRooms.add(roomdetail_id); // เพิ่มห้องที่เช็คแล้วเข้าไปในรายการ
+        //   console.log(`Room ${roomdetail_id} is booked`);
         } else {
           updateRoomStatus(roomdetail_id, 1);
-        //   console.log('reservationTime',reservationTime)
-        //   console.log('endTime',endTime)
-        //   console.log('nowThailand',nowThailand.format('YYYY-MM-DD'+'T'+'HH:mm:ss'))
+        //   console.log(`Room ${roomdetail_id} is available`);
         }
       });
     });
   }
-
+  
   app.put('/update-room-status', (req, res) => {
     compareAndUpdateRoomStatus();
     res.status(200).json({ status: 'ok' });
   });
+  
   
 // API endpoint สำหรับอัปเดต status_room จากฐานข้อมูล reservation--------------------------------------------------------------------
 
@@ -684,7 +712,7 @@ app.get('/attendee', function (req, res) {
 //Get attendee---------------------------------------------------------------------------------------------------------------
 
 //setInterval------------------------------------------------------------------------------------------------------------------------
-const updateInterval = 5 * 60 * 1000; // 5 นาทีในมิลลิวินาที
+const updateInterval = 1 * 10 * 1000; // 5 นาทีในมิลลิวินาที
 setInterval(compareAndUpdateRoomStatus, updateInterval);
 compareAndUpdateRoomStatus();
 //setInterval------------------------------------------------------------------------------------------------------------------------

@@ -55,6 +55,7 @@
   
   <script>
     import axios from 'axios';
+    import URL from '@/components/url.js'
   export default {
     data() {
     return {
@@ -72,7 +73,7 @@
 
     // Fetch room details
     axios
-      .get(`http://localhost:3333/room/${roomDetailId}`)
+      .get(URL+`/room/${roomDetailId}`)
       .then((response) => {
         this.room = response.data.room;
       })
@@ -84,7 +85,7 @@
   methods: {
     fetchattendee() {
       axios
-        .get('http://localhost:3333/attendee')
+        .get(URL+'/attendee')
         .then((response) => {
           this.getattendee = response.data.allmail;
         })
@@ -111,7 +112,7 @@
   try {
     const roomDetailId = this.$route.params.roomdetail_id;
     const token = localStorage.getItem('token');
-    const response = await fetch(`http://localhost:3333/room/${roomDetailId}`, {
+    const response = await fetch(URL+`/room/${roomDetailId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -122,6 +123,7 @@
         end_time: this.formattedEndTime,
         date_reservation: this.formattedDate,
         update_reservlog: this.formattedDate,
+        attendee_email: this.selectedAttendee,
       }),
     });
 

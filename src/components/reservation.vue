@@ -37,7 +37,7 @@
   </template>
   <script>
   import axios from 'axios';
-  
+  import URL from '@/components/url.js'
   export default {
     name: 'Reservation-list',
     data() {
@@ -48,7 +48,7 @@
     methods: {
         fetchReservation(token) {
       axios
-        .get(`http://localhost:3333/getreservations/${token}`)
+        .get(URL+`/getreservations/${token}`)
         .then((response) => {
           const {status, reservations } = response.data;
           if (status === 'ok') {
@@ -66,7 +66,7 @@
     console.log('Attempting to cancel reservation with ID:', reservation.reservation_id);
 
     axios
-        .delete(`http://localhost:3333/cancelreservation/${reservation.reservation_id}/${token}`)
+        .delete(URL+`/cancelreservation/${reservation.reservation_id}/${token}`)
         .then((response) => {
             console.log(response);  // Log the response
             const { status, message } = response.data;

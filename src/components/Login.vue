@@ -23,6 +23,8 @@
 
 <script>
 import axios from 'axios';
+import URL from '@/components/url.js'
+
 export default {
   
   name: 'LoginForm', // ระบุชื่อของคอมโพเนนต์เป็น "LoginForm"
@@ -38,7 +40,7 @@ export default {
 
       // ส่ง POST request เพื่อ login
       axios
-        .post('http://localhost:3333/login', {
+        .post(URL+'/login', {
           user_username: this.user_username,
           user_password: this.user_password,
         })

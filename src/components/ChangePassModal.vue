@@ -27,7 +27,7 @@
 
 <script>
 import axios from 'axios';
-
+import URL from '@/components/url.js'
 export default {
   data() {
     return {
@@ -40,7 +40,7 @@ export default {
     confirmChangepass() {
       const Token = localStorage.getItem('token');
       if (this.confirmpassword === this.confirmpasswordagain) {
-        axios.put('http://localhost:3333/newPassword', {
+        axios.put(URL+'/newPassword', {
             token: Token,
             user_password: this.changepassword,
             user_newpassword: this.confirmpassword

@@ -176,7 +176,7 @@
 <script>
 import axios from 'axios';
 import navbarLogin  from '@/components/navbarLogin.vue'
-
+import URL from '@/components/url.js'
 export default {
   name: "HomePage",
   components: {
@@ -200,7 +200,7 @@ export default {
     },
     fetchRoomData() {
       axios
-        .get('http://localhost:3333/room')
+        .get(URL+'/room')
         .then((response) => {
           this.rooms = response.data.rooms;
           console.log(response.data.rooms);

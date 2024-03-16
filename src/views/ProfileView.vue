@@ -12,7 +12,7 @@
           <h1 class="user-name">{{ user.firstName }} {{ user.lastName }}</h1>
           <p class="user-email">{{ user.email }}</p>
         </div>
-        <p class="user-bio">online: 24 Hour</p>
+        <p class="user-bio">MY PROFILE</p>
         <p class="profile-contact">Phone: {{ user.phoneNumber }}</p>
       </div>
     </profile-card>
@@ -28,7 +28,7 @@
 import axios from 'axios';
 import ChangePassModal from '@/components/ChangePassModal.vue'
 import EditModal from '@/components/EditModal.vue'
-
+import URL from '@/components/url.js'
 export default {
   components: {
     ChangePassModal,
@@ -44,7 +44,7 @@ export default {
   methods: {
     fetchUserProfile(token) {
       axios
-        .get(`http://localhost:3333/profile/${token}`)
+        .get(URL+`/profile/${token}`)
         .then((response) => {
           const { status, usname, usemail, usphone, usimg } = response.data;
           if (status === 'ok') {
@@ -54,7 +54,9 @@ export default {
               email: usemail,
               phoneNumber: usphone,
               usimg: usimg,
+              
             };
+            alert(usimg)
           } else {
             console.error(response.data.message);
           }
@@ -63,6 +65,7 @@ export default {
           console.error('Failed to fetch user profile.', error);
         });
     },
+    
     openChangePassModal() {
       this.showChangePassModal = true;
     },
@@ -130,7 +133,7 @@ body {
 .user-bio {
   font-size: 16px;
   padding: 20px;
-  text-align: left;
+  text-align: center;
 }
 
 .profile-contact {

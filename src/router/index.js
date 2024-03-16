@@ -4,6 +4,7 @@ import Profile from '../views/ProfileView.vue'
 import Register from '../components/register.vue'
 import Login from '../components/Login.vue'
 import BlankPage from '../components/BlankPage.vue'
+import BlankPage2 from '../components/BlankPage2.vue'
 import rooms from '../components/rooms.vue'
 import roomdetail from '../components/roomdetail.vue'
 import reservation from '../components/reservation.vue'
@@ -39,7 +40,7 @@ const routes = [
       },
       {
         path: 'policy', 
-        component:  BlankPage,
+        component:  BlankPage2,
       },
       // ...
     ],

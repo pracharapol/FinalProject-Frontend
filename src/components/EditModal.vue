@@ -27,7 +27,7 @@
   
   <script>
   import axios from 'axios';
-  
+  import URL from '@/components/url.js'
   export default {
     data() {
       return {
@@ -38,7 +38,7 @@
     },
     mounted() {
     const Token = localStorage.getItem('token');
-    axios.get(`http://localhost:3333/profile/${Token}`)
+    axios.get(URL+`/profile/${Token}`)
       .then(response => {
         const data = response.data;
         if (data.status === 'ok') {
@@ -56,7 +56,7 @@
     methods: {
         confirmEdit() {
         const Token = localStorage.getItem('token');
-          axios.put('http://localhost:3333/newProfile', {
+          axios.put(URL+'/newProfile', {
               token: Token,
               user_fname: this.fname,
               user_lname: this.lname,
