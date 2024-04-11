@@ -9,7 +9,7 @@ const saltRounds = 10;
 var jwt = require('jsonwebtoken');
 const secret = "visiblepassword"
 const moment = require('moment-timezone');
-const thailandTimezone = 'Asia/Bangkok'; // โซนเวลาของประเทศไทย
+const thailandTimezone = 'Asia/Bangkok';
 const nowThailand = moment().tz(thailandTimezone);
 app.use(cors())
 app.use(bodyParser.json());
@@ -17,12 +17,7 @@ app.use(bodyParser.json());
 const mysql = require('mysql2');
 const req = require('express/lib/request');
 
-const connection = mysql.createConnection({
-    host: 'localhost',//192.168.186.71
-    user: 'root',
-    // password:'kong',
-    database: 'mydb'//projectfinaldb
-});
+
 // checkEmailError-----------------------------------------------------------------------------------------------------------
 const checkEmailError = (req, res, results) => {
     if (results.length > 0) {
@@ -90,7 +85,7 @@ app.post('/login', jsonParser, function (req, res, next) {
             const userId = users[0].user_id;
             bcrypt.compare(req.body.user_password, users[0].user_password, function (err, isLogin) {
                 if (isLogin) {
-                    var token = jwt.sign({ user_id: userId, username: users[0].user_username }, secret, { expiresIn: '10h' });
+                    var token = jwt.sign({ user_id: userId, username: users[0].user_username }, secret, { expiresIn: '1h' });
                     res.json({ status: 'ok', message: 'login success', token })
 
                 }
@@ -327,7 +322,7 @@ async function isRoomAvailable(roomDetail, dateReserve, startTime, endTime) {
     }
 }
 
-// ฟังก์ชันสำหรับดึงข้อมูลการจองสำหรับห้องและวันที่ที่กำหนด
+
 function getReservationsForRoomAndDate(roomDetail, dateReserve) {
     return new Promise((resolve, reject) => {
         connection.execute(
@@ -373,7 +368,6 @@ app.get('/room/:room_id', async function (req, res) {
         const roomDetailId = req.params.room_id;
         
         if (roomDetailId) {
-            // ดึงข้อมูลห้องโดยใช้ Promise หรือฟังก์ชันที่เหมาะสม
             const roomData = await getRoomDetail(roomDetailId);
             
             if (roomData) {
@@ -396,7 +390,6 @@ app.get('/room', (req, res) => {
         console.error('Error querying MySQL:', err);
         res.status(500).json({ status: 'error', message: 'Failed to retrieve room list' });
       } else {
-        // ปรับเปลี่ยนค่า status_room เป็นคำอธิบายที่เหมาะสม
         const roomsWithStatusDescription = results.map((room) => {
           if (room.status_room === 0) {
             room.status_room = 'booked';
@@ -421,7 +414,7 @@ function updateRoomStatus(roomdetail_id, status) {
     });
   }
   function compareAndUpdateRoomStatus() {
-    const nowThailand = moment().tz('Asia/Bangkok'); // เวลาปัจจุบันในเขตเวลาไทย
+    const nowThailand = moment().tz('Asia/Bangkok');
     connection.query('SELECT roomdetail_id, start_time, end_time, date_reservation FROM reservation', (err, results) => {
       if (err) {
         console.error('Failed to fetch reservation data', err);
@@ -438,15 +431,13 @@ function updateRoomStatus(roomdetail_id, status) {
         const endTime1 = moment(end_time, 'HH:mm:ss').format('HH:mm:ss');
         const endTime = moment(datereservationTime + 'T' + endTime1);
   
-        if (checkedRooms.has(roomdetail_id)) return; // ถ้าห้องนี้เช็คแล้ว ไม่ต้องทำอะไรเพิ่มเติม
+        if (checkedRooms.has(roomdetail_id)) return;
   
         if (nowThailand.isBetween(reservationTime, endTime)) {
           updateRoomStatus(roomdetail_id, 0);
-          checkedRooms.add(roomdetail_id); // เพิ่มห้องที่เช็คแล้วเข้าไปในรายการ
-        //   console.log(`Room ${roomdetail_id} is booked`);
+          checkedRooms.add(roomdetail_id);
         } else {
           updateRoomStatus(roomdetail_id, 1);
-        //   console.log(`Room ${roomdetail_id} is available`);
         }
       });
     });
@@ -477,11 +468,9 @@ app.get('/getreservations/:token', function (req, res) {
                     res.json({ status: 'error', message: 'No reservations found for this user' });
                     return;
                 }
-
-                // สร้างรายการข้อมูลการจอง
                 
                 const reservations = results.map((result) => {
-                    const date_reservation = moment(result.date_reservation); // แปลงเป็น Moment object
+                    const date_reservation = moment(result.date_reservation);
                     date_reservation.add(7, 'hours');
                     return {
                         start_time: result.start_time,
@@ -558,7 +547,6 @@ app.post('/roomdetail',jsonParser, (req, res) => {
         const reservationId = req.params.reservation_id;
 
         if (reservationId) {
-            // ตรวจสอบว่าผู้ใช้ที่ต้องการยกเลิกการจองเป็นเจ้าของการจอง
             connection.execute(
                 'SELECT user_id FROM user_insystem WHERE user_username = ?',
                 [username],
@@ -575,7 +563,6 @@ app.post('/roomdetail',jsonParser, (req, res) => {
 
                     const userId = results[0].user_id;
 
-                    // ตรวจสอบว่าการจองที่ต้องการยกเลิกมี userId ตรงกับผู้ใช้ปัจจุบัน
                     connection.execute(
                         'SELECT user_id FROM reservation WHERE reservation_id = ?',
                         [reservationId],
@@ -595,7 +582,6 @@ app.post('/roomdetail',jsonParser, (req, res) => {
                                 return;
                             }
 
-                            // ถ้าผู้ใช้มีสิทธิ์ยกเลิกการจอง ให้ลบการจอง
                             connection.execute(
                                 'DELETE FROM reservation WHERE reservation_id = ?',
                                 [reservationId],
@@ -626,7 +612,6 @@ app.post('/roomdetail',jsonParser, (req, res) => {
     try {
         const roomDetailId = req.params.roomdetail_id;
         
-        // คิวรีเรียกข้อมูลการจองในห้องที่ระบุ
         connection.execute(
             'SELECT * FROM reservation WHERE roomdetail_id = ?',
             [roomDetailId],
@@ -650,7 +635,6 @@ app.post('/roomdetail',jsonParser, (req, res) => {
                 });
 
                 if (reservationsToDelete.length > 0) {
-                    // ลูปผ่านการจองที่ต้องการลบและลบข้อมูลการจอง
                     for (const reservation of reservationsToDelete) {
                         connection.execute(
                             'DELETE FROM reservation WHERE reservation_id = ?',
@@ -698,7 +682,6 @@ app.get('/attendee', function (req, res) {
                 if (results.length == 0) {
                     return res.json({ status: 'error', message: 'no user found' });
                 }
-                // ต้องดึงออกจาก results ในรูปแบบของ array
                 let allMails = results.map(result => result.user_email);
                 res.json({ status: 'ok', message: 'success', allmail: allMails });
                 return;
@@ -712,7 +695,7 @@ app.get('/attendee', function (req, res) {
 //Get attendee---------------------------------------------------------------------------------------------------------------
 
 //setInterval------------------------------------------------------------------------------------------------------------------------
-const updateInterval = 1 * 10 * 1000; // 5 นาทีในมิลลิวินาที
+const updateInterval = 1 * 10 * 1000;
 setInterval(compareAndUpdateRoomStatus, updateInterval);
 compareAndUpdateRoomStatus();
 //setInterval------------------------------------------------------------------------------------------------------------------------
